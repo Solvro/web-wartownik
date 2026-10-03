@@ -15,7 +15,6 @@ export const env = createEnv({
     NASA_FIRMS_MAP_KEY: z.string().length(32),
   },
   client: {
-    NEXT_PUBLIC_GOOGLE_MAPS_KEY: z.string().length(39),
     NEXT_PUBLIC_SITE_URL: z.url(),
     NEXT_PUBLIC_ANALYTICS_SRC: z.url().optional(),
     NEXT_PUBLIC_ANALYTICS_WEBSITE_ID: z.string().min(1).optional(),
@@ -25,7 +24,6 @@ export const env = createEnv({
   runtimeEnv: {
     DATABASE_URI: process.env.DATABASE_URI,
     NASA_FIRMS_MAP_KEY: process.env.NASA_FIRMS_MAP_KEY,
-    NEXT_PUBLIC_GOOGLE_MAPS_KEY: process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY,
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || DEFAULT_SITE_URL,
     NEXT_PUBLIC_ANALYTICS_SRC: process.env.NEXT_PUBLIC_ANALYTICS_SRC,
     NEXT_PUBLIC_ANALYTICS_WEBSITE_ID:

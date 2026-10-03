@@ -380,7 +380,7 @@ export function MapScreen() {
           )}
 
           <StatusStrip
-            className="absolute right-3 bottom-4 left-[404px] z-10"
+            className="absolute right-3 bottom-12 left-[404px] z-10"
             isFetching={data.isFetching}
             isLocating={isLocating}
             failedLayers={data.failedLayers}

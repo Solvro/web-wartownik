@@ -1,11 +1,17 @@
 # Defensownik
 
 Mapa bezpieczeństwa dla Polski: schrony, drony i rakiety, samoloty wojskowe, jakość powietrza,
-pożary, stany ostrzegawcze rzek, defibrylatory (AED) i zgłoszenia mieszkańców w jednym miejscu,
-plus interaktywna lista „plecaka bezpieczeństwa”.
+pożary, stany ostrzegawcze rzek, defibrylatory (AED) i zgłoszenia mieszkańców w jednym miejscu.
+Dla każdego z 16 województw liczony jest status zagrożenia powietrznego (w regionie / zbliża się
+z ETA / w pobliżu) na podstawie pozycji, kursu, prędkości i niepewności położenia obiektów.
+
+Tryb symulacji (`/map?symulacja`) dokłada skryptowany scenariusz: grupa dronów leci znad obwodu
+wołyńskiego nad województwo lubelskie, a wszystkie elementy są oznaczone jako „SYMULACJA”.
 
 Stack: Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, shadcn/ui, TanStack Query,
-Drizzle ORM, PostgreSQL 17 + PostGIS 3.5, Google Maps (`google-map-react`), `supercluster`.
+Drizzle ORM, PostgreSQL 17 + PostGIS 3.5, MapLibre GL (`react-map-gl`) z kafelkami
+[OpenFreeMap](https://openfreemap.org), geokodowanie [Photon](https://photon.komoot.io),
+granice województw z [polska-geojson](https://github.com/ppatrzyk/polska-geojson) i Turf.
 
 ## Źródła danych
 
@@ -21,16 +27,17 @@ Drizzle ORM, PostgreSQL 17 + PostGIS 3.5, Google Maps (`google-map-react`), `sup
 
 ## Wymagane klucze API
 
-- `NEXT_PUBLIC_GOOGLE_MAPS_KEY`: Google Maps JavaScript API z włączonymi Places i Geocoding,
 - `NASA_FIRMS_MAP_KEY`: klucz [NASA FIRMS](https://firms.modaps.eosdis.nasa.gov/api/map_key/),
 - `DATABASE_URI`: connection string do Postgresa z PostGIS.
 
 Opcjonalne zmienne opisuje [`.env.example`](.env.example).
 
+Mapa, kafelki i wyszukiwarka nie wymagają kluczy.
+
 ## Uruchomienie lokalne
 
 ```bash
-pnpm install
+pnpm install                 # postinstall kopiuje web worker MapLibre do public/maplibre
 docker compose up -d
 cp .env.example .env.local   # uzupełnij klucze
 pnpm db:migrate
