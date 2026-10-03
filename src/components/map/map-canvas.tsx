@@ -16,7 +16,11 @@ import MapGL, {
 } from "react-map-gl/maplibre";
 import type { MapRef } from "react-map-gl/maplibre";
 
-import { DEFAULT_CENTER, DEFAULT_ZOOM } from "@/config/constants";
+import {
+  DEFAULT_CENTER,
+  DEFAULT_ZOOM,
+  POLAND_BOUNDS,
+} from "@/config/constants";
 import { useMap } from "@/hooks/use-map";
 import { buildMapFeatures } from "@/lib/map/features";
 import { addMissingImage } from "@/lib/map/images";
@@ -181,6 +185,13 @@ export function MapCanvas({
     localizeBaseStyle(map);
     setLabelLayerId(firstSymbolLayerId(map));
     map.setPadding({ top: 0, right: 0, bottom: 0, left: sidePadding });
+    map.fitBounds(
+      [
+        [POLAND_BOUNDS.west, POLAND_BOUNDS.south],
+        [POLAND_BOUNDS.east, POLAND_BOUNDS.north],
+      ],
+      { padding: 24, animate: false },
+    );
     reportViewport(map);
     void locateUser();
   }, [registerMap, reportViewport, locateUser, sidePadding]);

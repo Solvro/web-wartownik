@@ -280,11 +280,11 @@ export function MapScreen() {
               emptyLayers={data.emptyLayers}
             />
           </div>
-          <MapControls className="absolute right-3 bottom-28 z-10" />
+          <MapControls className="absolute right-3 bottom-36 z-10" />
           <button
             type="button"
             onClick={() => setLayersOpen(true)}
-            className="absolute inset-x-3 bottom-3 z-10 text-left"
+            className="absolute inset-x-3 bottom-9 z-10 text-left"
           >
             {situation}
           </button>
@@ -292,7 +292,7 @@ export function MapScreen() {
           <Drawer open={layersOpen} onOpenChange={setLayersOpen}>
             <DrawerContent className="max-h-[85dvh]">
               <DrawerTitle className="sr-only">Warstwy</DrawerTitle>
-              <div className="flex flex-col gap-3 overflow-y-auto p-4">
+              <div className="flex flex-col gap-3 overflow-y-auto p-4 *:shrink-0">
                 {situation}
                 {layerList}
                 <Button
