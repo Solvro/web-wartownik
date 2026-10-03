@@ -16,7 +16,7 @@ export const API_URL =
   process.env.EXPO_PUBLIC_API_URL ??
   devServerApiUrl() ??
   extra?.apiUrl ??
-  "https://defensownik.solvro.pl";
+  "https://wartownik.b.solvro.pl";
 
 export const EAS_PROJECT_ID = extra?.eas?.projectId;
 

@@ -59,7 +59,7 @@
       "reactCompiler": true
     },
     "extra": {
-      "apiUrl": "https://defensownik.solvro.pl"
+      "apiUrl": "https://wartownik.b.solvro.pl"
     }
   }
 }
