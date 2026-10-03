@@ -50,6 +50,7 @@ const MAP_ICON_SOURCES = Object.fromEntries(
 export interface MapCanvasHandle {
   flyTo(center: Coordinates, zoom?: number): void;
   fitPoland(): void;
+  resetNorth(): void;
 }
 
 interface MapCanvasProps {
@@ -60,6 +61,7 @@ interface MapCanvasProps {
   regionStates: RegionState[];
   showUserLocation: boolean;
   onViewportChange(viewport: MapViewport): void;
+  onBearingChange(bearing: number): void;
   onSelectPoint(index: number): void;
   onSelectRegion(regionId: string): void;
 }
@@ -275,6 +277,7 @@ export const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(
       regionStates,
       showUserLocation,
       onViewportChange,
+      onBearingChange,
       onSelectPoint,
       onSelectRegion,
     },
@@ -300,6 +303,8 @@ export const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(
             duration: 600,
           },
         ),
+      resetNorth: () =>
+        void camera.current?.setStop({ bearing: 0, pitch: 0, duration: 400 }),
     }));
 
     const regions = useMemo(
@@ -366,7 +371,11 @@ export const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(
         attributionPosition={{ bottom: 8, right: 8 }}
         logo={false}
         compass={false}
+        onRegionIsChanging={({ nativeEvent }) =>
+          onBearingChange(nativeEvent.bearing)
+        }
         onRegionDidChange={({ nativeEvent }) => {
+          onBearingChange(nativeEvent.bearing);
           const [west, south, east, north] = nativeEvent.bounds;
           onViewportChange({
             west,

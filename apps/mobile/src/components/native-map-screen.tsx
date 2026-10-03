@@ -10,6 +10,7 @@ import { ConnectivityBanner } from "@/components/connectivity-banner";
 import { LayerToggles } from "@/components/layer-toggles";
 import { MapCanvas } from "@/components/map-canvas";
 import type { MapCanvasHandle } from "@/components/map-canvas";
+import { MapCompass } from "@/components/map-compass";
 import { PointDetails } from "@/components/point-details";
 import { RegionDetails } from "@/components/region-details";
 import { useConnectivity } from "@/hooks/use-connectivity";
@@ -43,6 +44,7 @@ function MapButton({
 export function NativeMapScreen() {
   const settings = useSettings();
   const [viewport, setViewport] = useState<MapViewport | null>(null);
+  const [bearing, setBearing] = useState(0);
   const [selection, setSelection] = useState<Selection>(null);
   const map = useRef<MapCanvasHandle>(null);
   const detailsSheet = useRef<BottomSheet>(null);
@@ -91,6 +93,7 @@ export function NativeMapScreen() {
         regionStates={data.regionStates}
         showUserLocation={location !== null}
         onViewportChange={setViewport}
+        onBearingChange={(next) => setBearing(Math.round(next))}
         onSelectPoint={(index) => {
           lastPointPress.current = Date.now();
           select({ kind: "point", index });
@@ -123,6 +126,10 @@ export function NativeMapScreen() {
           />
         </View>
         <View style={styles.controls}>
+          <MapCompass
+            bearing={bearing}
+            onPress={() => map.current?.resetNorth()}
+          />
           <MapButton
             onPress={() => {
               detailsSheet.current?.close();
