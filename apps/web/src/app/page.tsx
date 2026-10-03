@@ -1,7 +1,7 @@
 import { LAYER_VISUALS } from "@wartownik/shared/config/layer-visuals";
 import { REGION_STATUS_VISUALS } from "@wartownik/shared/regions";
 import { LAYERS } from "@wartownik/shared/types/layers";
-import { ArrowRight, Play } from "lucide-react";
+import { ArrowRight, BellRing, Download, Play, WifiOff } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -23,6 +23,21 @@ const SOURCES: Record<string, string> = {
   "Defibrylatory (AED)": "OpenStreetMap",
   "Zgłoszenia użytkowników": "Społeczność",
 };
+
+const APK_URL = "/wartownik.apk";
+
+const APP_FEATURES = [
+  {
+    icon: BellRing,
+    title: "Alerty dla województw",
+    text: "Powiadomienie, zanim zagrożenie dotrze do obserwowanych województw.",
+  },
+  {
+    icon: WifiOff,
+    title: "Działa offline",
+    text: "Schrony i AED z okolicy zapisane w telefonie wskażą drogę bez internetu.",
+  },
+];
 
 const STATUS_STEPS = [
   {
@@ -87,6 +102,12 @@ export default function HomePage() {
                 <Play />
                 Zobacz symulację
               </Link>
+            </Button>
+            <Button asChild size="lg" variant="outline">
+              <a href={APK_URL} download>
+                <Download />
+                Pobierz na Androida
+              </a>
             </Button>
           </div>
         </section>
@@ -184,6 +205,37 @@ export default function HomePage() {
               );
             })}
           </ol>
+        </section>
+        <section className="grid items-center gap-10 border-t py-24 md:grid-cols-[1.2fr_1fr]">
+          <div>
+            <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
+              Wartownik na Androida
+            </h2>
+            <p className="mt-2 max-w-xl text-muted-foreground">
+              Ta sama mapa w telefonie, plus powiadomienia i tryb offline.
+              Pobierz plik APK i zainstaluj go, zezwalając na instalację z tego
+              źródła.
+            </p>
+            <Button asChild size="lg" className="mt-6">
+              <a href={APK_URL} download>
+                <Download />
+                Pobierz APK
+              </a>
+            </Button>
+          </div>
+          <ul className="flex flex-col gap-3">
+            {APP_FEATURES.map(({ icon: FeatureIcon, title, text }) => (
+              <li key={title} className="flex gap-4 rounded-2xl border p-4">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white">
+                  <FeatureIcon className="size-4.5" strokeWidth={2.25} />
+                </span>
+                <div>
+                  <h3 className="font-medium">{title}</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">{text}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
         </section>
       </main>
 
