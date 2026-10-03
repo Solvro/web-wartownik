@@ -2,6 +2,7 @@
 
 import { ChevronRight, ShieldCheck, TriangleAlert } from "lucide-react";
 
+import { conjugateNumeric } from "@/lib/helpers/numerals";
 import {
   REGION_STATUS_RANK,
   REGION_STATUS_VISUALS,
@@ -96,7 +97,7 @@ export function SituationCard({
             {updatedAt === undefined
               ? null
               : ` · ${timeFormat.format(updatedAt)}`}
-            {` · ${threatCount} ${threatCount === 1 ? "obiekt" : "obiektów"} w regionie`}
+            {` · ${threatCount} ${conjugateNumeric(threatCount, "obiekt", "", "y", "ów")} w regionie`}
           </p>
         </div>
         {demo ? (

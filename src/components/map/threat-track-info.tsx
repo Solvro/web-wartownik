@@ -3,6 +3,7 @@
 import { Route } from "lucide-react";
 
 import { useThreatTrack } from "@/hooks/use-threat-track";
+import { conjugateNumeric } from "@/lib/helpers/numerals";
 
 export function ThreatTrackInfo({ threatId }: { threatId: string }) {
   const { data } = useThreatTrack(threatId);
@@ -21,7 +22,7 @@ export function ThreatTrackInfo({ threatId }: { threatId: string }) {
       <Route className="size-3.5 shrink-0" />
       {data.length < 2
         ? "Przebyta trasa pojawi się po kolejnych meldunkach."
-        : `Przebyta trasa: ${data.length} meldunków z ostatnich ${minutes < 60 ? `${minutes} min` : `${Math.floor(minutes / 60)} h ${minutes % 60} min`}`}
+        : `Przebyta trasa: ${data.length} ${conjugateNumeric(data.length, "meldun", "ek", "ki", "ków")} z ostatnich ${minutes < 60 ? `${minutes} min` : `${Math.floor(minutes / 60)} h ${minutes % 60} min`}`}
     </p>
   );
 }
