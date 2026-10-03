@@ -41,7 +41,10 @@ yarn-error.log*
 next-env.d.ts
 
 *.dmp
-assets/PL.geojson
+packages/db/assets/PL.geojson
 !.env.example
 
-/public/maplibre
+apps/web/public/maplibre
+apps/web/public/geo
+
+.turbo

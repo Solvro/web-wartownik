@@ -3,3 +3,8 @@ drizzle/meta
 .next
 public/maplibre
 public/geo
+.turbo
+apps/web/public/maplibre
+apps/web/public/geo
+apps/web/.next
+next-env.d.ts

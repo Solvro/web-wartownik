@@ -1,0 +1,20 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "stream",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**"],
+      "env": [
+        "DATABASE_URI",
+        "NASA_FIRMS_MAP_KEY",
+        "NEXT_PUBLIC_*",
+        "SKIP_ENV_VALIDATION"
+      ]
+    },
+    "dev": { "cache": false, "persistent": true },
+    "start": { "cache": false, "persistent": true },
+    "lint": {},
+    "typecheck": {}
+  }
+}

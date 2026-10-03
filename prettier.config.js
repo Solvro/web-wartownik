@@ -8,7 +8,7 @@ const config = {
   importOrder: ["<THIRD_PARTY_MODULES>", "^@/(.*)$", "^[./]"],
   importOrderSeparation: true,
   importOrderSortSpecifiers: true,
-  tailwindStylesheet: "./src/app/globals.css",
+  tailwindStylesheet: "./apps/web/src/app/globals.css",
 };
 
 export default config;
