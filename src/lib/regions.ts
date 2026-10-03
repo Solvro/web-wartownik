@@ -10,15 +10,29 @@ import type {
 } from "geojson";
 
 import { REGION_WATCH_DISTANCE_KM } from "@/config/constants";
+import { haversineDistance } from "@/lib/helpers/geo";
 import type { Layer, LayerLocation } from "@/types/layers";
-import type { Bounds } from "@/types/map";
+import type { Bounds, Coordinates } from "@/types/map";
 
 export type RegionStatus = "threat" | "approaching" | "watch" | "none";
+
+export type RegionCountry = "PL" | "UA" | "BY";
+export type RegionKind = "voivodeship" | "oblast" | "city" | "republic";
 
 export interface RegionProperties {
   id: string;
   name: string;
+  label: string;
+  country: RegionCountry;
+  kind: RegionKind;
 }
+
+export const REGION_KIND_LABELS: Record<RegionKind, string> = {
+  voivodeship: "Województwo",
+  oblast: "Obwód",
+  city: "Miasto wydzielone",
+  republic: "Republika autonomiczna",
+};
 
 export type RegionFeature = Feature<Polygon | MultiPolygon, RegionProperties>;
 export type RegionCollection = FeatureCollection<
@@ -36,6 +50,9 @@ export interface RegionThreat {
 export interface RegionState {
   id: string;
   name: string;
+  label: string;
+  country: RegionCountry;
+  kind: RegionKind;
   status: RegionStatus;
   threats: RegionThreat[];
   etaMinutes: number | null;
@@ -60,17 +77,41 @@ export const REGION_STATUS_VISUALS: Record<
 
 export const regionGenitive = (name: string) => `${name}go`;
 
+const KM_PER_DEGREE = 111;
+
+function bboxDistanceKm(bounds: Bounds, { lat, lng }: Coordinates): number {
+  const dLat = Math.max(bounds.se.lat - lat, 0, lat - bounds.nw.lat);
+  const dLng = Math.max(bounds.nw.lng - lng, 0, lng - bounds.se.lng);
+  return Math.hypot(
+    dLat * KM_PER_DEGREE,
+    dLng * KM_PER_DEGREE * Math.cos((lat * Math.PI) / 180),
+  );
+}
+
 function classify(
   region: RegionFeature,
+  bounds: Bounds,
   threat: LayerLocation<Layer.Drones>,
+  includeWatch: boolean,
 ): RegionThreat | null {
+  const reach = Math.max(
+    REGION_WATCH_DISTANCE_KM,
+    threat.meta.uncertaintyKm ?? 0,
+    threat.meta.predictedPath === null
+      ? 0
+      : haversineDistance(threat, threat.meta.predictedPath),
+  );
+  if (bboxDistanceKm(bounds, threat) > reach) {
+    return null;
+  }
+
   const position = point([threat.lng, threat.lat]);
   const active = !threat.meta.stale && !threat.meta.advisory;
 
   if (booleanPointInPolygon(position, region)) {
     return {
       threatId: threat.meta.id,
-      status: active ? "threat" : "watch",
+      status: active || !includeWatch ? "threat" : "watch",
       distanceKm: 0,
       etaMinutes: null,
     };
@@ -104,6 +145,9 @@ function classify(
   }
 
   const uncertainty = threat.meta.uncertaintyKm ?? 0;
+  if (!includeWatch) {
+    return null;
+  }
   if (distanceKm <= REGION_WATCH_DISTANCE_KM || uncertainty >= distanceKm) {
     return {
       threatId: threat.meta.id,
@@ -120,8 +164,10 @@ export function computeRegionStates(
   threats: LayerLocation<Layer.Drones>[],
 ): RegionState[] {
   return regions.features.map((region) => {
+    const bounds = regionBounds(region);
+    const includeWatch = region.properties.country === "PL";
     const regionThreats = threats
-      .map((threat) => classify(region, threat))
+      .map((threat) => classify(region, bounds, threat, includeWatch))
       .filter((entry): entry is RegionThreat => entry !== null)
       .sort(
         (a, b) =>
@@ -133,8 +179,7 @@ export function computeRegionStates(
       .map((entry) => entry.etaMinutes)
       .filter((eta): eta is number => eta !== null);
     return {
-      id: region.properties.id,
-      name: region.properties.name,
+      ...region.properties,
       status: top?.status ?? "none",
       threats: regionThreats,
       etaMinutes: etas.length > 0 ? Math.min(...etas) : null,

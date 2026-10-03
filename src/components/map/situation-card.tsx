@@ -32,7 +32,7 @@ export function regionAlertText(region: RegionState): string {
 
 export function sortedAlerts(regions: RegionState[]): RegionState[] {
   return regions
-    .filter((region) => region.status !== "none")
+    .filter((region) => region.country === "PL" && region.status !== "none")
     .sort(
       (a, b) =>
         REGION_STATUS_RANK[b.status] - REGION_STATUS_RANK[a.status] ||

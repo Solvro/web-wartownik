@@ -82,9 +82,7 @@ export function MapScreen() {
   const { data: regionCollection = null } = useQuery({
     queryKey: ["regions-geometry"],
     queryFn: async () =>
-      (await (
-        await fetch("/geo/voivodeships.json")
-      ).json()) as RegionCollection,
+      (await (await fetch("/geo/regions.json")).json()) as RegionCollection,
     staleTime: Infinity,
   });
 

@@ -275,7 +275,7 @@ function regionOpacity(dark: boolean, scale: number): ExpressionSpecification {
     0.24 * scale,
     "watch",
     0.15 * scale,
-    (dark ? 0.05 : 0.04) * scale,
+    ["case", ["==", ["get", "country"], "PL"], (dark ? 0.05 : 0.04) * scale, 0],
   ];
 }
 
@@ -366,7 +366,7 @@ export function regionLabel(
     minzoom: 4.5,
     maxzoom: 9,
     layout: {
-      "text-field": ["upcase", ["get", "name"]],
+      "text-field": ["upcase", ["get", "label"]],
       "text-font": FONT_REGULAR,
       "text-size": ["interpolate", ["linear"], ["zoom"], 4.5, 8, 8, 12],
       "text-letter-spacing": 0.12,

@@ -5,7 +5,7 @@ import { Maximize2, X } from "lucide-react";
 import { Icon } from "@/components/icon";
 import { Button } from "@/components/ui/button";
 import { THREAT_VISUALS } from "@/config/presentation";
-import { REGION_STATUS_VISUALS } from "@/lib/regions";
+import { REGION_KIND_LABELS, REGION_STATUS_VISUALS } from "@/lib/regions";
 import type { RegionState } from "@/lib/regions";
 import type { Layer, LayerLocation } from "@/types/layers";
 
@@ -31,7 +31,12 @@ export function RegionContent({
       <div className="flex items-start gap-3">
         <div className="min-w-0 flex-1">
           <p className="text-xs tracking-wider text-muted-foreground uppercase">
-            Województwo
+            {REGION_KIND_LABELS[region.kind]}
+            {region.country === "PL"
+              ? null
+              : region.country === "UA"
+                ? " · Ukraina"
+                : " · Białoruś"}
           </p>
           <h2 className="text-lg leading-tight font-semibold">{region.name}</h2>
           <span
@@ -65,8 +70,9 @@ export function RegionContent({
 
       {region.threats.length === 0 ? (
         <p className="rounded-xl border bg-muted/40 px-3.5 py-3 text-sm text-muted-foreground">
-          W promieniu 50 km od granic województwa nie ma obecnie zgłoszonych
-          zagrożeń powietrznych.
+          {region.country === "PL"
+            ? "W promieniu 50 km od granic województwa nie ma obecnie zgłoszonych zagrożeń powietrznych."
+            : "W granicach regionu nie ma obecnie zgłoszonych zagrożeń powietrznych."}
         </p>
       ) : (
         <ul className="divide-y rounded-xl border bg-muted/40">
@@ -98,7 +104,7 @@ export function RegionContent({
                     </span>
                     <span className="block text-xs text-muted-foreground">
                       {entry.distanceKm === 0
-                        ? "w granicach województwa"
+                        ? "w granicach regionu"
                         : `${Math.round(entry.distanceKm)} km od granicy`}
                       {entry.etaMinutes === null
                         ? ""
@@ -124,7 +130,7 @@ export function RegionContent({
 
       <Button variant="outline" onClick={onZoom}>
         <Maximize2 />
-        Pokaż województwo
+        Pokaż na mapie
       </Button>
     </div>
   );
