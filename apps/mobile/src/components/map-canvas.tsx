@@ -304,7 +304,12 @@ export const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(
           },
         ),
       resetNorth: () =>
-        void camera.current?.setStop({ bearing: 0, pitch: 0, duration: 400 }),
+        void camera.current?.setStop({
+          bearing: 0,
+          pitch: 0,
+          duration: 500,
+          easing: "ease",
+        }),
     }));
 
     const regions = useMemo(
