@@ -1,5 +1,5 @@
-import { isIconName } from "@defensownik/shared/config/icons";
-import type { IconName } from "@defensownik/shared/config/icons";
+import { isIconName } from "@wartownik/shared/config/icons";
+import type { IconName } from "@wartownik/shared/config/icons";
 import {
   Bomb as BombNode,
   Drone as DroneNode,

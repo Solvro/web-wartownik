@@ -1,6 +1,6 @@
-import { reports } from "@defensownik/db";
-import { reportFormSchema } from "@defensownik/shared/schemas/report";
 import { TRPCError } from "@trpc/server";
+import { reports } from "@wartownik/db";
+import { reportFormSchema } from "@wartownik/shared/schemas/report";
 import { z } from "zod";
 
 import { getDb } from "../db";

@@ -1,5 +1,5 @@
-import { appRouter } from "@defensownik/api";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
+import { appRouter } from "@wartownik/api";
 
 function handler(request: Request) {
   return fetchRequestHandler({

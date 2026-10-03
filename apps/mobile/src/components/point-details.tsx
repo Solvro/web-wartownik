@@ -1,9 +1,9 @@
-import { haversineDistance } from "@defensownik/shared/geo/geo";
-import { formatDistance } from "@defensownik/shared/presentation/format";
-import { isLink, presentPoint } from "@defensownik/shared/presentation/index";
-import type { DetailValue } from "@defensownik/shared/presentation/index";
-import type { LayerPoint } from "@defensownik/shared/types/layers";
-import type { Coordinates } from "@defensownik/shared/types/map";
+import { haversineDistance } from "@wartownik/shared/geo/geo";
+import { formatDistance } from "@wartownik/shared/presentation/format";
+import { isLink, presentPoint } from "@wartownik/shared/presentation/index";
+import type { DetailValue } from "@wartownik/shared/presentation/index";
+import type { LayerPoint } from "@wartownik/shared/types/layers";
+import type { Coordinates } from "@wartownik/shared/types/map";
 import { Navigation } from "lucide-react-native";
 import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 

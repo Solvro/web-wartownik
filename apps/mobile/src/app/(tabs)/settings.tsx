@@ -63,7 +63,7 @@ export default function SettingsScreen() {
     if (enabled && !(await requestNotificationPermission())) {
       Alert.alert(
         "Brak zgody",
-        "Włącz powiadomienia dla Defensownika w ustawieniach telefonu.",
+        "Włącz powiadomienia dla Wartownika w ustawieniach telefonu.",
       );
       return;
     }

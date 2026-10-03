@@ -1,13 +1,13 @@
-import { createDb } from "@defensownik/db";
-import type { Database } from "@defensownik/db";
+import { createDb } from "@wartownik/db";
+import type { Database } from "@wartownik/db";
 
 import { serverEnv } from "./env";
 
 const globalForDb = globalThis as typeof globalThis & {
-  defensownikDb?: Database;
+  wartownikDb?: Database;
 };
 
 export function getDb(): Database {
-  globalForDb.defensownikDb ??= createDb(serverEnv().DATABASE_URI);
-  return globalForDb.defensownikDb;
+  globalForDb.wartownikDb ??= createDb(serverEnv().DATABASE_URI);
+  return globalForDb.wartownikDb;
 }

@@ -1,6 +1,6 @@
-import { LAYER_VISUALS } from "@defensownik/shared/config/layer-visuals";
-import { LAYER_CONFIG } from "@defensownik/shared/config/layers";
-import type { Layer } from "@defensownik/shared/types/layers";
+import { LAYER_VISUALS } from "@wartownik/shared/config/layer-visuals";
+import { LAYER_CONFIG } from "@wartownik/shared/config/layers";
+import type { Layer } from "@wartownik/shared/types/layers";
 import { Info, TriangleAlert } from "lucide-react";
 
 import { Spinner } from "@/components/ui/spinner";

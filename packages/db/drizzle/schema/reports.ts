@@ -1,4 +1,4 @@
-import { REPORT_EVENT_TYPES } from "@defensownik/shared/config/reports";
+import { REPORT_EVENT_TYPES } from "@wartownik/shared/config/reports";
 import {
   doublePrecision,
   integer,

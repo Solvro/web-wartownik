@@ -1,6 +1,6 @@
-import { defibrillators, shelters } from "@defensownik/db";
-import type { Layer, LayerLocation } from "@defensownik/shared/types/layers";
-import type { Coordinates } from "@defensownik/shared/types/map";
+import { defibrillators, shelters } from "@wartownik/db";
+import type { Layer, LayerLocation } from "@wartownik/shared/types/layers";
+import type { Coordinates } from "@wartownik/shared/types/map";
 import { sql } from "drizzle-orm";
 
 import { getDb } from "../db";

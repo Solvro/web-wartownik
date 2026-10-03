@@ -1,13 +1,13 @@
-import { defibrillators } from "@defensownik/db";
+import { defibrillators } from "@wartownik/db";
 import {
   MAX_DB_POINTS,
   SERVER_CLUSTERING_MAX_ZOOM,
-} from "@defensownik/shared/config/constants";
+} from "@wartownik/shared/config/constants";
 import type {
   Layer,
   LayerData,
   LayerFetchFunction,
-} from "@defensownik/shared/types/layers";
+} from "@wartownik/shared/types/layers";
 import { and, inArray, sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
 

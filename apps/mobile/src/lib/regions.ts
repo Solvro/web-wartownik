@@ -1,11 +1,11 @@
-import regionsGeometry from "@defensownik/shared/geo/regions.json";
+import { booleanPointInPolygon } from "@turf/boolean-point-in-polygon";
+import { point } from "@turf/helpers";
+import regionsGeometry from "@wartownik/shared/geo/regions.json";
 import type {
   RegionCollection,
   RegionFeature,
-} from "@defensownik/shared/regions";
-import type { Coordinates } from "@defensownik/shared/types/map";
-import { booleanPointInPolygon } from "@turf/boolean-point-in-polygon";
-import { point } from "@turf/helpers";
+} from "@wartownik/shared/regions";
+import type { Coordinates } from "@wartownik/shared/types/map";
 
 export const REGIONS = regionsGeometry as unknown as RegionCollection;
 

@@ -1,4 +1,4 @@
-import { demoThreats } from "@defensownik/shared/demo";
+import { demoThreats } from "@wartownik/shared/demo";
 import type { PoolClient } from "pg";
 
 import { getDb } from "../db";

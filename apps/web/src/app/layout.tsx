@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Defensownik",
+  title: "Wartownik",
   description:
     "Mapa bezpieczeństwa Polski na żywo: zagrożenia powietrzne, schrony, AED, pożary, jakość powietrza i stany rzek.",
   metadataBase: new URL(env.NEXT_PUBLIC_SITE_URL),

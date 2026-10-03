@@ -1,4 +1,4 @@
-import type { ReportFormValues } from "@defensownik/shared/schemas/report";
+import type { ReportFormValues } from "@wartownik/shared/schemas/report";
 
 import { queryClient } from "./query-client";
 import { trpcClient } from "./trpc";

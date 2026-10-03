@@ -1,5 +1,5 @@
 {
-  "name": "@defensownik/db",
+  "name": "@wartownik/db",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -15,7 +15,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@defensownik/shared": "workspace:*",
+    "@wartownik/shared": "workspace:*",
     "dotenv": "^18.0.5",
     "drizzle-orm": "^0.45.3",
     "pg": "^8.23.1"

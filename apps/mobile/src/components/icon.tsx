@@ -1,4 +1,4 @@
-import type { IconName } from "@defensownik/shared/config/icons";
+import type { IconName } from "@wartownik/shared/config/icons";
 import {
   Bomb,
   Drone,

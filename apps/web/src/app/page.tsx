@@ -1,6 +1,6 @@
-import { LAYER_VISUALS } from "@defensownik/shared/config/layer-visuals";
-import { REGION_STATUS_VISUALS } from "@defensownik/shared/regions";
-import { LAYERS } from "@defensownik/shared/types/layers";
+import { LAYER_VISUALS } from "@wartownik/shared/config/layer-visuals";
+import { REGION_STATUS_VISUALS } from "@wartownik/shared/regions";
+import { LAYERS } from "@wartownik/shared/types/layers";
 import { ArrowRight, Play } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -71,7 +71,7 @@ export default function HomePage() {
             </span>
           </h1>
           <p className="mt-5 max-w-xl text-base text-balance text-muted-foreground md:text-lg">
-            Defensownik zbiera w jednym miejscu zagrożenia powietrzne przy
+            Wartownik zbiera w jednym miejscu zagrożenia powietrzne przy
             granicy, schrony, defibrylatory, pożary, jakość powietrza i stany
             rzek, a dla każdego województwa wylicza status zagrożenia.
           </p>
@@ -96,7 +96,7 @@ export default function HomePage() {
           <div className="overflow-hidden rounded-2xl border bg-background/60 p-1.5 shadow-2xl backdrop-blur">
             <Image
               src={heroLight}
-              alt="Defensownik – mapa w jasnym motywie"
+              alt="Wartownik – mapa w jasnym motywie"
               className="block rounded-xl dark:hidden"
               priority
               placeholder="blur"
@@ -104,7 +104,7 @@ export default function HomePage() {
             />
             <Image
               src={heroDark}
-              alt="Defensownik – mapa w ciemnym motywie"
+              alt="Wartownik – mapa w ciemnym motywie"
               className="hidden rounded-xl dark:block"
               priority
               placeholder="blur"
@@ -190,7 +190,7 @@ export default function HomePage() {
       <footer className="border-t">
         <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-8 text-xs text-muted-foreground md:flex-row md:items-center md:justify-between">
           <p className="max-w-xl">
-            Defensownik to nieoficjalne źródło dodatkowe. Nie zastępuje syren,
+            Wartownik to nieoficjalne źródło dodatkowe. Nie zastępuje syren,
             alertów RCB ani RSO – w razie zagrożenia kieruj się komunikatami
             służb. Numer alarmowy: 112.
           </p>

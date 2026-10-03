@@ -1,5 +1,5 @@
-import { threatPositions } from "@defensownik/db";
-import type { ThreatTrackPoint } from "@defensownik/shared/types/threat-track";
+import { threatPositions } from "@wartownik/db";
+import type { ThreatTrackPoint } from "@wartownik/shared/types/threat-track";
 import { and, asc, eq, gte } from "drizzle-orm";
 
 import { getDb } from "../db";

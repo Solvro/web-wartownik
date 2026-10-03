@@ -1,6 +1,6 @@
-import { ENABLED_LAYERS_COOKIE } from "@defensownik/shared/config/constants";
-import { LAYERS, Layer } from "@defensownik/shared/types/layers";
-import type { EnabledLayers } from "@defensownik/shared/types/layers";
+import { ENABLED_LAYERS_COOKIE } from "@wartownik/shared/config/constants";
+import { LAYERS, Layer } from "@wartownik/shared/types/layers";
+import type { EnabledLayers } from "@wartownik/shared/types/layers";
 import Cookies from "js-cookie";
 
 export const DEFAULT_ENABLED_LAYERS = Object.fromEntries(

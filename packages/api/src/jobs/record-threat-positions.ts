@@ -1,4 +1,4 @@
-import { threatPositions } from "@defensownik/db";
+import { threatPositions } from "@wartownik/db";
 import { lt } from "drizzle-orm";
 
 import { getDb } from "../db";

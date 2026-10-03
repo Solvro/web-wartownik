@@ -1,11 +1,11 @@
-import { POLAND_BOUNDS } from "@defensownik/shared/config/constants";
+import { POLAND_BOUNDS } from "@wartownik/shared/config/constants";
 import type {
   FireConfidence,
   FireMeta,
   Layer,
   LayerFetchFunction,
   LayerLocation,
-} from "@defensownik/shared/types/layers";
+} from "@wartownik/shared/types/layers";
 
 import { serverEnv } from "../env";
 import { parseCsv } from "../helpers/csv";

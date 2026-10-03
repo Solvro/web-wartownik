@@ -1,12 +1,12 @@
-import { LAYER_CONFIG } from "@defensownik/shared/config/layers";
-import { destinationPoint } from "@defensownik/shared/geo/geo";
-import { presentPoint } from "@defensownik/shared/presentation/index";
-import { Layer } from "@defensownik/shared/types/layers";
+import { LAYER_CONFIG } from "@wartownik/shared/config/layers";
+import { destinationPoint } from "@wartownik/shared/geo/geo";
+import { presentPoint } from "@wartownik/shared/presentation/index";
+import { Layer } from "@wartownik/shared/types/layers";
 import type {
   LayerClusterWithLayer,
   LayerPoint,
-} from "@defensownik/shared/types/layers";
-import type { Coordinates } from "@defensownik/shared/types/map";
+} from "@wartownik/shared/types/layers";
+import type { Coordinates } from "@wartownik/shared/types/map";
 import type {
   Feature,
   FeatureCollection,

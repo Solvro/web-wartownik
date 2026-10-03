@@ -1,10 +1,10 @@
 "use client";
 
-import { haversineDistance } from "@defensownik/shared/geo/geo";
-import { formatDistance } from "@defensownik/shared/presentation/format";
-import { presentPoint } from "@defensownik/shared/presentation/index";
-import { Layer } from "@defensownik/shared/types/layers";
-import type { LayerPoint } from "@defensownik/shared/types/layers";
+import { haversineDistance } from "@wartownik/shared/geo/geo";
+import { formatDistance } from "@wartownik/shared/presentation/format";
+import { presentPoint } from "@wartownik/shared/presentation/index";
+import { Layer } from "@wartownik/shared/types/layers";
+import type { LayerPoint } from "@wartownik/shared/types/layers";
 import { Navigation, X } from "lucide-react";
 
 import { Icon } from "@/components/icon";

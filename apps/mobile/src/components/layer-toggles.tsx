@@ -1,6 +1,6 @@
-import { LAYER_VISUALS } from "@defensownik/shared/config/layer-visuals";
-import { LAYERS } from "@defensownik/shared/types/layers";
-import type { Layer } from "@defensownik/shared/types/layers";
+import { LAYER_VISUALS } from "@wartownik/shared/config/layer-visuals";
+import { LAYERS } from "@wartownik/shared/types/layers";
+import type { Layer } from "@wartownik/shared/types/layers";
 import { StyleSheet, Switch, Text, View } from "react-native";
 
 import { updateSettings, useSettings } from "@/lib/settings";

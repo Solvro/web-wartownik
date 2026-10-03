@@ -17,7 +17,7 @@ export const TILE_SIZE_PX = 256;
 export const EARTH_RADIUS_KM = 6371;
 export const MAX_DB_POINTS = 5000;
 
-export const ENABLED_LAYERS_COOKIE = "defensownik_enabled_layers";
+export const ENABLED_LAYERS_COOKIE = "wartownik_enabled_layers";
 export const VIEWPORT_DEBOUNCE_MS = 250;
 
 export const MAPLIBRE_TO_WEB_ZOOM_OFFSET = 1;

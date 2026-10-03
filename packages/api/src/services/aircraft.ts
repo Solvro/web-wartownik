@@ -1,9 +1,9 @@
-import { destinationPoint, isInBounds } from "@defensownik/shared/geo/geo";
+import { destinationPoint, isInBounds } from "@wartownik/shared/geo/geo";
 import type {
   Layer,
   LayerFetchFunction,
   LayerLocation,
-} from "@defensownik/shared/types/layers";
+} from "@wartownik/shared/types/layers";
 
 import { fetchQuery } from "../helpers/fetch-query";
 

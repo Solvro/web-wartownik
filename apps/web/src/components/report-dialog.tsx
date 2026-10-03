@@ -1,14 +1,14 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   REPORT_DESCRIPTION_MAX_LENGTH,
   REPORT_EVENT_TYPES,
   REPORT_EVENT_TYPE_LABELS,
-} from "@defensownik/shared/config/reports";
-import { reportFormSchema } from "@defensownik/shared/schemas/report";
-import type { ReportFormValues } from "@defensownik/shared/schemas/report";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+} from "@wartownik/shared/config/reports";
+import { reportFormSchema } from "@wartownik/shared/schemas/report";
+import type { ReportFormValues } from "@wartownik/shared/schemas/report";
 import { Crosshair, MapPin } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useState } from "react";

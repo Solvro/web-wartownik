@@ -1,4 +1,4 @@
-import { SHELTER_AVAILABILITIES } from "@defensownik/shared/config/shelters";
+import { SHELTER_AVAILABILITIES } from "@wartownik/shared/config/shelters";
 import {
   index,
   pgEnum,

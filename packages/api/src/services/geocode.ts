@@ -1,4 +1,4 @@
-import type { GeocodeResult } from "@defensownik/shared/types/geocode";
+import type { GeocodeResult } from "@wartownik/shared/types/geocode";
 
 import { fetchQuery } from "../helpers/fetch-query";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { conjugateNumeric } from "@defensownik/shared/geo/numerals";
+import { conjugateNumeric } from "@wartownik/shared/geo/numerals";
 import { Route } from "lucide-react";
 
 import { useThreatTrack } from "@/hooks/use-threat-track";

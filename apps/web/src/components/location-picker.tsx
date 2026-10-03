@@ -1,6 +1,6 @@
 "use client";
 
-import type { Coordinates } from "@defensownik/shared/types/map";
+import type { Coordinates } from "@wartownik/shared/types/map";
 import { MapPin } from "lucide-react";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useTheme } from "next-themes";

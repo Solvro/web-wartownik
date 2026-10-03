@@ -1,11 +1,11 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   REGION_STATUS_RANK,
   computeRegionStates,
   regionAlertText,
-} from "@defensownik/shared/regions";
-import type { RegionState, RegionStatus } from "@defensownik/shared/regions";
-import type { Layer, LayerLocation } from "@defensownik/shared/types/layers";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+} from "@wartownik/shared/regions";
+import type { RegionState, RegionStatus } from "@wartownik/shared/regions";
+import type { Layer, LayerLocation } from "@wartownik/shared/types/layers";
 import * as BackgroundTask from "expo-background-task";
 import * as Notifications from "expo-notifications";
 import * as TaskManager from "expo-task-manager";
@@ -18,9 +18,9 @@ import type { Settings } from "./settings";
 import { trpcClient } from "./trpc";
 
 export const ALERT_CHANNEL_ID = "alerts";
-const BACKGROUND_TASK = "defensownik-region-check";
-const LAST_STATUS_KEY = "defensownik-last-alert-status";
-const PUSH_TOKEN_KEY = "defensownik-push-token";
+const BACKGROUND_TASK = "wartownik-region-check";
+const LAST_STATUS_KEY = "wartownik-last-alert-status";
+const PUSH_TOKEN_KEY = "wartownik-push-token";
 const BACKGROUND_INTERVAL_MINUTES = 15;
 
 Notifications.setNotificationHandler({

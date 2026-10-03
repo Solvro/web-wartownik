@@ -1,4 +1,4 @@
-import type { Coordinates } from "@defensownik/shared/types/map";
+import type { Coordinates } from "@wartownik/shared/types/map";
 import { sql } from "drizzle-orm";
 import { customType } from "drizzle-orm/pg-core";
 

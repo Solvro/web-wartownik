@@ -2,7 +2,7 @@ import type {
   Layer,
   LayerFetchFunction,
   LayerLocation,
-} from "@defensownik/shared/types/layers";
+} from "@wartownik/shared/types/layers";
 
 import { parseWarsawDate } from "../helpers/dates";
 import { fetchQuery } from "../helpers/fetch-query";

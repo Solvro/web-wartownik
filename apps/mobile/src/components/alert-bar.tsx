@@ -2,8 +2,8 @@ import {
   REGION_STATUS_VISUALS,
   regionAlertText,
   sortedAlerts,
-} from "@defensownik/shared/regions";
-import type { RegionState } from "@defensownik/shared/regions";
+} from "@wartownik/shared/regions";
+import type { RegionState } from "@wartownik/shared/regions";
 import { TriangleAlert } from "lucide-react-native";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 

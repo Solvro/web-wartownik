@@ -1,6 +1,6 @@
 "use client";
 
-import { POLAND_BOUNDS } from "@defensownik/shared/config/constants";
+import { POLAND_BOUNDS } from "@wartownik/shared/config/constants";
 import { Crosshair, Minus, Plus, Scan } from "lucide-react";
 import { toast } from "sonner";
 

@@ -1,5 +1,5 @@
-import { Layer } from "@defensownik/shared/types/layers";
-import type { LayerFetchFunction } from "@defensownik/shared/types/layers";
+import { Layer } from "@wartownik/shared/types/layers";
+import type { LayerFetchFunction } from "@wartownik/shared/types/layers";
 
 import { getAeds } from "./aeds";
 import { getAircraft } from "./aircraft";

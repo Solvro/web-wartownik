@@ -1,12 +1,12 @@
 "use client";
 
-import { conjugateNumeric } from "@defensownik/shared/geo/numerals";
+import { conjugateNumeric } from "@wartownik/shared/geo/numerals";
 import {
   REGION_STATUS_RANK,
   REGION_STATUS_VISUALS,
   regionGenitive,
-} from "@defensownik/shared/regions";
-import type { RegionState } from "@defensownik/shared/regions";
+} from "@wartownik/shared/regions";
+import type { RegionState } from "@wartownik/shared/regions";
 import { ChevronRight, ShieldCheck, TriangleAlert } from "lucide-react";
 
 import { cn } from "@/lib/utils";

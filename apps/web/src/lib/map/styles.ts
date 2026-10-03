@@ -1,6 +1,6 @@
-import { LAYER_VISUALS } from "@defensownik/shared/config/layer-visuals";
-import { LAYER_CONFIG } from "@defensownik/shared/config/layers";
-import { REGION_STATUS_VISUALS } from "@defensownik/shared/regions";
+import { LAYER_VISUALS } from "@wartownik/shared/config/layer-visuals";
+import { LAYER_CONFIG } from "@wartownik/shared/config/layers";
+import { REGION_STATUS_VISUALS } from "@wartownik/shared/regions";
 import type {
   CircleLayerSpecification,
   ExpressionSpecification,

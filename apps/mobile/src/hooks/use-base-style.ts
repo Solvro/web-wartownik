@@ -1,5 +1,5 @@
-import { BASE_MAP_STYLES, localizeStyle } from "@defensownik/shared/map-style";
 import { useQuery } from "@tanstack/react-query";
+import { BASE_MAP_STYLES, localizeStyle } from "@wartownik/shared/map-style";
 
 type Style = {
   layers: { id: string; type: string; layout?: Record<string, unknown> }[];

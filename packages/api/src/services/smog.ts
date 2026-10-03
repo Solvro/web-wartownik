@@ -1,4 +1,4 @@
-import { getClosestPoints, isInBounds } from "@defensownik/shared/geo/geo";
+import { getClosestPoints, isInBounds } from "@wartownik/shared/geo/geo";
 import type {
   AirQualityIndex,
   AirQualityStation,
@@ -6,7 +6,7 @@ import type {
   Layer,
   LayerFetchFunction,
   LayerLocation,
-} from "@defensownik/shared/types/layers";
+} from "@wartownik/shared/types/layers";
 
 import { deserializeNullableDate } from "../helpers/dates";
 import { fetchQuery } from "../helpers/fetch-query";

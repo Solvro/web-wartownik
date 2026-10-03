@@ -1,11 +1,3 @@
-import { POLAND_BOUNDS } from "@defensownik/shared/config/constants";
-import { REGION_STATUS_VISUALS } from "@defensownik/shared/regions";
-import type { RegionState } from "@defensownik/shared/regions";
-import type {
-  LayerClusterWithLayer,
-  LayerPoint,
-} from "@defensownik/shared/types/layers";
-import type { Coordinates } from "@defensownik/shared/types/map";
 import type { ExpressionSpecification } from "@maplibre/maplibre-gl-style-spec";
 import {
   Camera,
@@ -23,6 +15,14 @@ import type {
   StyleSpecification,
   SymbolLayerSpecification,
 } from "@maplibre/maplibre-react-native";
+import { POLAND_BOUNDS } from "@wartownik/shared/config/constants";
+import { REGION_STATUS_VISUALS } from "@wartownik/shared/regions";
+import type { RegionState } from "@wartownik/shared/regions";
+import type {
+  LayerClusterWithLayer,
+  LayerPoint,
+} from "@wartownik/shared/types/layers";
+import type { Coordinates } from "@wartownik/shared/types/map";
 import type { Feature, Point } from "geojson";
 import { forwardRef, useImperativeHandle, useMemo, useRef } from "react";
 import { StyleSheet } from "react-native";

@@ -34,11 +34,7 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [{ protocol: "https", hostname: "t.plnspttrs.net" }],
   },
-  transpilePackages: [
-    "@defensownik/api",
-    "@defensownik/db",
-    "@defensownik/shared",
-  ],
+  transpilePackages: ["@wartownik/api", "@wartownik/db", "@wartownik/shared"],
   turbopack: { root: repositoryRoot },
   async headers() {
     return [

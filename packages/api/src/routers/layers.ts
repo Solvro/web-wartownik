@@ -1,15 +1,15 @@
+import { TRPCError } from "@trpc/server";
 import {
   POLAND_BOUNDS,
   POLAND_CENTER,
-} from "@defensownik/shared/config/constants";
-import { LAYER_CONFIG, layerFromSlug } from "@defensownik/shared/config/layers";
-import { Layer } from "@defensownik/shared/types/layers";
+} from "@wartownik/shared/config/constants";
+import { LAYER_CONFIG, layerFromSlug } from "@wartownik/shared/config/layers";
+import { Layer } from "@wartownik/shared/types/layers";
 import type {
   LayerData,
   LayerFetchFunction,
-} from "@defensownik/shared/types/layers";
-import type { Viewport } from "@defensownik/shared/types/map";
-import { TRPCError } from "@trpc/server";
+} from "@wartownik/shared/types/layers";
+import type { Viewport } from "@wartownik/shared/types/map";
 import { z } from "zod";
 
 import { LAYER_FETCHERS } from "../services";

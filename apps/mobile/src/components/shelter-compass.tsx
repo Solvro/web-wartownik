@@ -1,6 +1,6 @@
-import { haversineDistance } from "@defensownik/shared/geo/geo";
-import { formatDistance } from "@defensownik/shared/presentation/format";
-import type { Coordinates } from "@defensownik/shared/types/map";
+import { haversineDistance } from "@wartownik/shared/geo/geo";
+import { formatDistance } from "@wartownik/shared/presentation/format";
+import type { Coordinates } from "@wartownik/shared/types/map";
 import * as Location from "expo-location";
 import { Navigation2 } from "lucide-react-native";
 import { useEffect, useState } from "react";

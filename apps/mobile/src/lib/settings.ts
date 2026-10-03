@@ -1,7 +1,7 @@
-import type { RegionStatus } from "@defensownik/shared/regions";
-import { LAYERS, Layer } from "@defensownik/shared/types/layers";
-import type { EnabledLayers } from "@defensownik/shared/types/layers";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import type { RegionStatus } from "@wartownik/shared/regions";
+import { LAYERS, Layer } from "@wartownik/shared/types/layers";
+import type { EnabledLayers } from "@wartownik/shared/types/layers";
 import { useSyncExternalStore } from "react";
 
 export type AlertThreshold = Exclude<RegionStatus, "none">;
@@ -14,7 +14,7 @@ export interface Settings {
   offlineRadiusKm: 10 | 30 | 50;
 }
 
-const STORAGE_KEY = "defensownik-settings";
+const STORAGE_KEY = "wartownik-settings";
 
 const DEFAULT_SETTINGS: Settings = {
   enabledLayers: Object.fromEntries(

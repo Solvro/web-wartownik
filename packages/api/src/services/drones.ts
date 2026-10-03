@@ -1,13 +1,13 @@
-import { PREDICTION_LIMITS } from "@defensownik/shared/config/threats";
-import { destinationPoint } from "@defensownik/shared/geo/geo";
+import { PREDICTION_LIMITS } from "@wartownik/shared/config/threats";
+import { destinationPoint } from "@wartownik/shared/geo/geo";
 import type {
   Layer,
   LayerFetchFunction,
   LayerLocation,
   ThreatConfidence,
   ThreatType,
-} from "@defensownik/shared/types/layers";
-import type { Coordinates } from "@defensownik/shared/types/map";
+} from "@wartownik/shared/types/layers";
+import type { Coordinates } from "@wartownik/shared/types/map";
 
 import { fetchQuery } from "../helpers/fetch-query";
 

@@ -1,5 +1,5 @@
 {
-  "name": "@defensownik/mobile",
+  "name": "@wartownik/mobile",
   "version": "1.0.0",
   "private": true,
   "main": "expo-router/entry",
@@ -11,7 +11,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@defensownik/shared": "workspace:*",
     "@gorhom/bottom-sheet": "5.2.14",
     "@maplibre/maplibre-react-native": "11.4.1",
     "@react-native-async-storage/async-storage": "2.2.0",
@@ -23,6 +22,7 @@
     "@trpc/tanstack-react-query": "11.19.0",
     "@turf/boolean-point-in-polygon": "^7.4.0",
     "@turf/helpers": "^7.4.0",
+    "@wartownik/shared": "workspace:*",
     "expo": "~57.0.26",
     "expo-background-task": "~57.0.21",
     "expo-constants": "~57.0.20",
@@ -50,10 +50,10 @@
     "superjson": "^2.2.6"
   },
   "devDependencies": {
-    "@defensownik/api": "workspace:*",
     "@maplibre/maplibre-gl-style-spec": "26.2.1",
     "@types/geojson": "^7946.0.16",
     "@types/react": "~19.2.2",
+    "@wartownik/api": "workspace:*",
     "eslint": "^9.39.5",
     "eslint-config-expo": "~57.0.2",
     "typescript": "~6.0.3"

@@ -1,4 +1,3 @@
-import type { AppRouter } from "@defensownik/api";
 import {
   createTRPCClient,
   httpBatchLink,
@@ -6,6 +5,7 @@ import {
   splitLink,
 } from "@trpc/client";
 import { createTRPCContext } from "@trpc/tanstack-react-query";
+import type { AppRouter } from "@wartownik/api";
 import superjson from "superjson";
 
 export const { TRPCProvider, useTRPC, useTRPCClient } =

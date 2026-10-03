@@ -1,13 +1,13 @@
 "use client";
 
-import { THREAT_VISUALS } from "@defensownik/shared/config/presentation";
+import { THREAT_VISUALS } from "@wartownik/shared/config/presentation";
 import {
   REGION_COUNTRY_LABELS,
   REGION_KIND_LABELS,
   REGION_STATUS_VISUALS,
-} from "@defensownik/shared/regions";
-import type { RegionState } from "@defensownik/shared/regions";
-import type { Layer, LayerLocation } from "@defensownik/shared/types/layers";
+} from "@wartownik/shared/regions";
+import type { RegionState } from "@wartownik/shared/regions";
+import type { Layer, LayerLocation } from "@wartownik/shared/types/layers";
 import { Maximize2, X } from "lucide-react";
 
 import { Icon } from "@/components/icon";

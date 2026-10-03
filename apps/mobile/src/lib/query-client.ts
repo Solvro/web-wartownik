@@ -19,7 +19,7 @@ export const queryClient = new QueryClient({
 
 export const queryPersister = createAsyncStoragePersister({
   storage: AsyncStorage,
-  key: "defensownik-query-cache",
+  key: "wartownik-query-cache",
   throttleTime: 2000,
 });
 

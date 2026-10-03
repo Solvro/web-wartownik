@@ -9,7 +9,7 @@ export function Brand({ className }: { className?: string }) {
         <ShieldHalf className="size-4.5" strokeWidth={2.25} />
       </span>
       <span className="text-[17px] font-semibold tracking-tight">
-        Defensownik
+        Wartownik
       </span>
     </span>
   );

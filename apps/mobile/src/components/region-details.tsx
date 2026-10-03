@@ -1,10 +1,10 @@
-import { THREAT_VISUALS } from "@defensownik/shared/config/presentation";
+import { THREAT_VISUALS } from "@wartownik/shared/config/presentation";
 import {
   REGION_KIND_LABELS,
   REGION_STATUS_VISUALS,
-} from "@defensownik/shared/regions";
-import type { RegionState } from "@defensownik/shared/regions";
-import type { Layer, LayerLocation } from "@defensownik/shared/types/layers";
+} from "@wartownik/shared/regions";
+import type { RegionState } from "@wartownik/shared/regions";
+import type { Layer, LayerLocation } from "@wartownik/shared/types/layers";
 import { StyleSheet, Text, View } from "react-native";
 
 import { colors, radius } from "@/lib/theme";

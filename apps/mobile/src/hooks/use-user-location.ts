@@ -1,4 +1,4 @@
-import type { Coordinates } from "@defensownik/shared/types/map";
+import type { Coordinates } from "@wartownik/shared/types/map";
 import * as Location from "expo-location";
 import { useCallback, useEffect, useState } from "react";
 

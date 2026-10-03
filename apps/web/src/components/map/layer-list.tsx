@@ -1,9 +1,9 @@
 "use client";
 
-import { LAYER_VISUALS } from "@defensownik/shared/config/layer-visuals";
-import { LEGEND } from "@defensownik/shared/presentation/legend";
-import { LAYERS } from "@defensownik/shared/types/layers";
-import type { Layer } from "@defensownik/shared/types/layers";
+import { LAYER_VISUALS } from "@wartownik/shared/config/layer-visuals";
+import { LEGEND } from "@wartownik/shared/presentation/legend";
+import { LAYERS } from "@wartownik/shared/types/layers";
+import type { Layer } from "@wartownik/shared/types/layers";
 import { TriangleAlert } from "lucide-react";
 
 import { Icon } from "@/components/icon";

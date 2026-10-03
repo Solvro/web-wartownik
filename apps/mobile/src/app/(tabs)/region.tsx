@@ -1,9 +1,9 @@
-import { SHELTER_AVAILABILITY_VISUALS } from "@defensownik/shared/config/presentation";
-import { formatDistance } from "@defensownik/shared/presentation/format";
+import { SHELTER_AVAILABILITY_VISUALS } from "@wartownik/shared/config/presentation";
+import { formatDistance } from "@wartownik/shared/presentation/format";
 import {
   REGION_STATUS_VISUALS,
   regionAlertText,
-} from "@defensownik/shared/regions";
+} from "@wartownik/shared/regions";
 import { router } from "expo-router";
 import { Navigation, ShieldCheck, TriangleAlert } from "lucide-react-native";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
@@ -174,7 +174,7 @@ export default function RegionScreen() {
         ) : null}
 
         <Text style={styles.disclaimer}>
-          W nagłych wypadkach dzwoń pod 112. Defensownik to nieoficjalne źródło
+          W nagłych wypadkach dzwoń pod 112. Wartownik to nieoficjalne źródło
           dodatkowe – nie zastępuje syren, alertów RCB ani komunikatów służb.
         </Text>
       </ScrollView>

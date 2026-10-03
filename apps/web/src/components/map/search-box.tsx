@@ -1,8 +1,8 @@
 "use client";
 
-import type { GeocodeResult } from "@defensownik/shared/types/geocode";
-import type { Coordinates } from "@defensownik/shared/types/map";
 import { useQuery } from "@tanstack/react-query";
+import type { GeocodeResult } from "@wartownik/shared/types/geocode";
+import type { Coordinates } from "@wartownik/shared/types/map";
 import { Loader2, MapPin, Search, X } from "lucide-react";
 import { useId, useState } from "react";
 import type { KeyboardEvent } from "react";

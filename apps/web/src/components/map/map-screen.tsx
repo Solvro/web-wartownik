@@ -1,20 +1,17 @@
 "use client";
 
-import { demoThreats } from "@defensownik/shared/demo";
-import { presentPoint } from "@defensownik/shared/presentation/index";
+import { useQuery } from "@tanstack/react-query";
+import { demoThreats } from "@wartownik/shared/demo";
+import { presentPoint } from "@wartownik/shared/presentation/index";
 import {
   REGION_STATUS_VISUALS,
   computeRegionStates,
   regionBounds,
-} from "@defensownik/shared/regions";
-import type {
-  RegionCollection,
-  RegionStatus,
-} from "@defensownik/shared/regions";
-import { LAYERS, Layer } from "@defensownik/shared/types/layers";
-import type { LayerPoint } from "@defensownik/shared/types/layers";
-import type { Coordinates } from "@defensownik/shared/types/map";
-import { useQuery } from "@tanstack/react-query";
+} from "@wartownik/shared/regions";
+import type { RegionCollection, RegionStatus } from "@wartownik/shared/regions";
+import { LAYERS, Layer } from "@wartownik/shared/types/layers";
+import type { LayerPoint } from "@wartownik/shared/types/layers";
+import type { Coordinates } from "@wartownik/shared/types/map";
 import { Layers, Megaphone, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -90,10 +87,7 @@ export function MapScreen() {
   const [layersOpen, setLayersOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [searchMarker, setSearchMarker] = useState<Coordinates | null>(null);
-  const [panelOpen, setPanelOpen] = useStoredFlag(
-    "defensownik-panel-open",
-    true,
-  );
+  const [panelOpen, setPanelOpen] = useStoredFlag("wartownik-panel-open", true);
 
   const data = useLayerData(enabledLayers, viewport);
 
@@ -307,7 +301,7 @@ export function MapScreen() {
           <div
             className={`${panelClass} absolute inset-x-3 top-3 z-20 flex items-center gap-2 p-2`}
           >
-            <Link href="/" aria-label="Defensownik">
+            <Link href="/" aria-label="Wartownik">
               <Brand className="[&>span:last-child]:hidden" />
             </Link>
             <SearchBox className="flex-1" onSelectResult={setSearchMarker} />
@@ -480,7 +474,7 @@ function CollapsedPanel({
     <div
       className={`${panelClass} absolute top-3 left-3 z-20 flex animate-in items-center gap-1 p-1.5 fade-in slide-in-from-left-2`}
     >
-      <Link href="/" aria-label="Defensownik" className="px-1">
+      <Link href="/" aria-label="Wartownik" className="px-1">
         <Brand className="[&>span:last-child]:hidden" />
       </Link>
       <Button variant="ghost" onClick={onOpen} className="gap-2">

@@ -1,20 +1,20 @@
 "use client";
 
+import { keepPreviousData, useQueries } from "@tanstack/react-query";
 import {
   MAPLIBRE_TO_WEB_ZOOM_OFFSET,
   VIEWPORT_DEBOUNCE_MS,
-} from "@defensownik/shared/config/constants";
-import { LAYER_CONFIG } from "@defensownik/shared/config/layers";
-import { snapBoundsToTiles } from "@defensownik/shared/geo/geo";
-import { LAYERS, Layer } from "@defensownik/shared/types/layers";
+} from "@wartownik/shared/config/constants";
+import { LAYER_CONFIG } from "@wartownik/shared/config/layers";
+import { snapBoundsToTiles } from "@wartownik/shared/geo/geo";
+import { LAYERS, Layer } from "@wartownik/shared/types/layers";
 import type {
   EnabledLayers,
   LayerClusterWithLayer,
   LayerLocation,
   LayerPoint,
-} from "@defensownik/shared/types/layers";
-import type { Viewport } from "@defensownik/shared/types/map";
-import { keepPreviousData, useQueries } from "@tanstack/react-query";
+} from "@wartownik/shared/types/layers";
+import type { Viewport } from "@wartownik/shared/types/map";
 import { useState } from "react";
 import { useDebounce } from "react-use";
 

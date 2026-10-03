@@ -1,8 +1,5 @@
-import { reports } from "@defensownik/db";
-import type {
-  Layer,
-  LayerFetchFunction,
-} from "@defensownik/shared/types/layers";
+import { reports } from "@wartownik/db";
+import type { Layer, LayerFetchFunction } from "@wartownik/shared/types/layers";
 
 import { getDb } from "../db";
 

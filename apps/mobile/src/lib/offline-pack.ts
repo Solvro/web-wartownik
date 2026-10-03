@@ -1,6 +1,6 @@
-import { getClosestPoints } from "@defensownik/shared/geo/geo";
-import type { Layer, LayerLocation } from "@defensownik/shared/types/layers";
-import type { Coordinates } from "@defensownik/shared/types/map";
+import { getClosestPoints } from "@wartownik/shared/geo/geo";
+import type { Layer, LayerLocation } from "@wartownik/shared/types/layers";
+import type { Coordinates } from "@wartownik/shared/types/map";
 import { File, Paths } from "expo-file-system";
 import { useSyncExternalStore } from "react";
 

@@ -1,4 +1,4 @@
-# Defensownik
+# Wartownik
 
 Mapa bezpieczeństwa dla Polski: schrony, drony i rakiety, samoloty wojskowe, jakość powietrza,
 pożary, stany ostrzegawcze rzek, defibrylatory (AED) i zgłoszenia mieszkańców w jednym miejscu.

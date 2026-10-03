@@ -1,16 +1,16 @@
-import { pushSubscriptions, regionAlertState } from "@defensownik/db";
-import regionsGeometry from "@defensownik/shared/geo/regions.json";
+import { pushSubscriptions, regionAlertState } from "@wartownik/db";
+import regionsGeometry from "@wartownik/shared/geo/regions.json";
 import {
   REGION_STATUS_RANK,
   computeRegionStates,
   regionAlertText,
-} from "@defensownik/shared/regions";
+} from "@wartownik/shared/regions";
 import type {
   RegionCollection,
   RegionState,
   RegionStatus,
-} from "@defensownik/shared/regions";
-import type { Layer, LayerLocation } from "@defensownik/shared/types/layers";
+} from "@wartownik/shared/regions";
+import type { Layer, LayerLocation } from "@wartownik/shared/types/layers";
 import { arrayOverlaps, eq, inArray, sql } from "drizzle-orm";
 
 import { getDb } from "../db";

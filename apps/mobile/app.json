@@ -1,15 +1,15 @@
 {
   "expo": {
-    "name": "Defensownik",
-    "slug": "defensownik",
+    "name": "Wartownik",
+    "slug": "wartownik",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "defensownik",
+    "scheme": "wartownik",
     "userInterfaceStyle": "dark",
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "pl.solvro.defensownik"
+      "bundleIdentifier": "pl.solvro.wartownik"
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +19,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "pl.solvro.defensownik"
+      "package": "pl.solvro.wartownik"
     },
     "plugins": [
       "expo-router",
@@ -41,7 +41,7 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Defensownik u\u017cywa lokalizacji, aby pokaza\u0107 status Twojego wojew\u00f3dztwa i najbli\u017csze schrony."
+          "locationWhenInUsePermission": "Wartownik u\u017cywa lokalizacji, aby pokaza\u0107 status Twojego wojew\u00f3dztwa i najbli\u017csze schrony."
         }
       ],
       "@maplibre/maplibre-react-native"

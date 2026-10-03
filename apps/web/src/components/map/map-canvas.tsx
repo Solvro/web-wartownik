@@ -1,15 +1,12 @@
 "use client";
 
-import { POLAND_BOUNDS } from "@defensownik/shared/config/constants";
-import type {
-  RegionCollection,
-  RegionStatus,
-} from "@defensownik/shared/regions";
+import { POLAND_BOUNDS } from "@wartownik/shared/config/constants";
+import type { RegionCollection, RegionStatus } from "@wartownik/shared/regions";
 import type {
   LayerClusterWithLayer,
   LayerPoint,
-} from "@defensownik/shared/types/layers";
-import type { Coordinates } from "@defensownik/shared/types/map";
+} from "@wartownik/shared/types/layers";
+import type { Coordinates } from "@wartownik/shared/types/map";
 import type { FeatureCollection, Point } from "geojson";
 import { MapPin } from "lucide-react";
 import type {

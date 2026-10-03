@@ -1,20 +1,20 @@
-import { shelters } from "@defensownik/db";
+import { shelters } from "@wartownik/db";
 import {
   MAX_DB_POINTS,
   SERVER_CLUSTERING_MAX_ZOOM,
-} from "@defensownik/shared/config/constants";
+} from "@wartownik/shared/config/constants";
 import {
   SHELTERS_CSV_URL,
   SHELTERS_MIN_VALID_ROWS,
   SHELTERS_SYNC_INTERVAL_MS,
   SHELTERS_SYNC_LOCK_ID,
-} from "@defensownik/shared/config/shelters";
-import type { ShelterAvailability } from "@defensownik/shared/config/shelters";
+} from "@wartownik/shared/config/shelters";
+import type { ShelterAvailability } from "@wartownik/shared/config/shelters";
 import type {
   Layer,
   LayerData,
   LayerFetchFunction,
-} from "@defensownik/shared/types/layers";
+} from "@wartownik/shared/types/layers";
 import { and, inArray, max, sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
 

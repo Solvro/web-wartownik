@@ -3,13 +3,13 @@
 import {
   DEFAULT_CENTER,
   DEFAULT_ZOOM,
-} from "@defensownik/shared/config/constants";
-import type { EnabledLayers, Layer } from "@defensownik/shared/types/layers";
+} from "@wartownik/shared/config/constants";
+import type { EnabledLayers, Layer } from "@wartownik/shared/types/layers";
 import type {
   Bounds,
   Coordinates,
   Viewport,
-} from "@defensownik/shared/types/map";
+} from "@wartownik/shared/types/map";
 import {
   createContext,
   useCallback,

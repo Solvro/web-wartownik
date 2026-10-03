@@ -1,14 +1,14 @@
-import { LAYER_CONFIG } from "@defensownik/shared/config/layers";
-import { computeRegionStates } from "@defensownik/shared/regions";
-import type { RegionState } from "@defensownik/shared/regions";
-import { LAYERS, Layer } from "@defensownik/shared/types/layers";
+import { keepPreviousData, useQueries } from "@tanstack/react-query";
+import { LAYER_CONFIG } from "@wartownik/shared/config/layers";
+import { computeRegionStates } from "@wartownik/shared/regions";
+import type { RegionState } from "@wartownik/shared/regions";
+import { LAYERS, Layer } from "@wartownik/shared/types/layers";
 import type {
   EnabledLayers,
   LayerClusterWithLayer,
   LayerLocation,
   LayerPoint,
-} from "@defensownik/shared/types/layers";
-import { keepPreviousData, useQueries } from "@tanstack/react-query";
+} from "@wartownik/shared/types/layers";
 import { useMemo } from "react";
 
 import { REGIONS } from "@/lib/regions";

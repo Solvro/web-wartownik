@@ -1,8 +1,8 @@
-import { isLink } from "@defensownik/shared/presentation/index";
+import { isLink } from "@wartownik/shared/presentation/index";
 import type {
   DetailValue,
   RichText,
-} from "@defensownik/shared/presentation/index";
+} from "@wartownik/shared/presentation/index";
 
 function ExternalLink({ href, text }: { href: string; text: string }) {
   const external = href.startsWith("http");

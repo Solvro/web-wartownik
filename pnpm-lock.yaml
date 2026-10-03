@@ -44,9 +44,6 @@ importers:
 
   apps/mobile:
     dependencies:
-      '@defensownik/shared':
-        specifier: workspace:*
-        version: link:../../packages/shared
       '@gorhom/bottom-sheet':
         specifier: 5.2.14
         version: 5.2.14(@types/react@19.2.18)(react-native-gesture-handler@2.32.0(react-native@0.86.3(@babel/core@7.29.7)(@react-native/metro-config@0.86.3(@babel/core@7.29.7))(@types/react@19.2.18)(react@19.2.3))(react@19.2.3))(react-native-reanimated@4.5.1(react-native-worklets@0.10.1(@babel/core@7.29.7)(@react-native/metro-config@0.86.3(@babel/core@7.29.7))(react-native@0.86.3(@babel/core@7.29.7)(@react-native/metro-config@0.86.3(@babel/core@7.29.7))(@types/react@19.2.18)(react@19.2.3))(react@19.2.3))(react-native@0.86.3(@babel/core@7.29.7)(@react-native/metro-config@0.86.3(@babel/core@7.29.7))(@types/react@19.2.18)(react@19.2.3))(react@19.2.3))(react-native@0.86.3(@babel/core@7.29.7)(@react-native/metro-config@0.86.3(@babel/core@7.29.7))(@types/react@19.2.18)(react@19.2.3))(react@19.2.3)
@@ -80,6 +77,9 @@ importers:
       '@turf/helpers':
         specifier: ^7.4.0
         version: 7.4.0
+      '@wartownik/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       expo:
         specifier: ~57.0.26
         version: 57.0.26(@babel/core@7.29.7)(@expo/dom-webview@57.0.1)(@expo/metro-runtime@57.0.16)(expo-router@57.0.24)(react-dom@19.2.8(react@19.2.3))(react-native-worklets@0.10.1(@babel/core@7.29.7)(@react-native/metro-config@0.86.3(@babel/core@7.29.7))(react-native@0.86.3(@babel/core@7.29.7)(@react-native/metro-config@0.86.3(@babel/core@7.29.7))(@types/react@19.2.18)(react@19.2.3))(react@19.2.3))(react-native@0.86.3(@babel/core@7.29.7)(@react-native/metro-config@0.86.3(@babel/core@7.29.7))(@types/react@19.2.18)(react@19.2.3))(react@19.2.3)(typescript@6.0.3)
@@ -156,9 +156,6 @@ importers:
         specifier: ^2.2.6
         version: 2.2.6
     devDependencies:
-      '@defensownik/api':
-        specifier: workspace:*
-        version: link:../../packages/api
       '@maplibre/maplibre-gl-style-spec':
         specifier: 26.2.1
         version: 26.2.1
@@ -168,6 +165,9 @@ importers:
       '@types/react':
         specifier: 19.2.18
         version: 19.2.18
+      '@wartownik/api':
+        specifier: workspace:*
+        version: link:../../packages/api
       eslint:
         specifier: ^9.39.5
         version: 9.39.5(jiti@2.7.0)
@@ -180,12 +180,6 @@ importers:
 
   apps/web:
     dependencies:
-      '@defensownik/api':
-        specifier: workspace:*
-        version: link:../../packages/api
-      '@defensownik/shared':
-        specifier: workspace:*
-        version: link:../../packages/shared
       '@hookform/resolvers':
         specifier: ^5.9.1
         version: 5.9.1(@sinclair/typebox@0.27.12)(ajv@8.20.0)(react-hook-form@7.89.0(@types/react@19.2.18)(react@19.2.8))(zod@4.6.5)
@@ -216,6 +210,12 @@ importers:
       '@turf/point-to-polygon-distance':
         specifier: ^7.4.0
         version: 7.4.0
+      '@wartownik/api':
+        specifier: workspace:*
+        version: link:../../packages/api
+      '@wartownik/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -313,15 +313,15 @@ importers:
 
   packages/api:
     dependencies:
-      '@defensownik/db':
-        specifier: workspace:*
-        version: link:../db
-      '@defensownik/shared':
-        specifier: workspace:*
-        version: link:../shared
       '@trpc/server':
         specifier: ^11.19.0
         version: 11.19.0(typescript@5.9.3)
+      '@wartownik/db':
+        specifier: workspace:*
+        version: link:../db
+      '@wartownik/shared':
+        specifier: workspace:*
+        version: link:../shared
       drizzle-orm:
         specifier: ^0.45.3
         version: 0.45.3(@types/pg@8.23.1)(pg@8.23.1)
@@ -353,7 +353,7 @@ importers:
 
   packages/db:
     dependencies:
-      '@defensownik/shared':
+      '@wartownik/shared':
         specifier: workspace:*
         version: link:../shared
       dotenv:

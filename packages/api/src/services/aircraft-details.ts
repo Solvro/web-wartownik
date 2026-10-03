@@ -2,7 +2,7 @@ import type {
   AircraftDetails,
   AircraftPhoto,
   AircraftTrackPoint,
-} from "@defensownik/shared/types/aircraft";
+} from "@wartownik/shared/types/aircraft";
 
 import { serverEnv } from "../env";
 import { fetchQuery } from "../helpers/fetch-query";
@@ -43,7 +43,7 @@ async function fetchPhoto(hex: string): Promise<AircraftPhoto | null> {
     `${PLANESPOTTERS_URL}/${hex}`,
     {
       headers: {
-        "User-Agent": `Defensownik/1.0 (+${serverEnv().SITE_URL})`,
+        "User-Agent": `Wartownik/1.0 (+${serverEnv().SITE_URL})`,
       },
       next: { revalidate: 86400 },
     },

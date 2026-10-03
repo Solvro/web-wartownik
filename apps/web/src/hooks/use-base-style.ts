@@ -1,5 +1,5 @@
-import { localizeStyle } from "@defensownik/shared/map-style";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { localizeStyle } from "@wartownik/shared/map-style";
 import type { StyleSpecification } from "maplibre-gl";
 
 import { MAP_STYLES } from "@/lib/map/styles";

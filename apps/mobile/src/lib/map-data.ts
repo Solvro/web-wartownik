@@ -1,12 +1,12 @@
-import { LAYER_VISUALS } from "@defensownik/shared/config/layer-visuals";
-import { LAYER_CONFIG } from "@defensownik/shared/config/layers";
-import { presentPoint } from "@defensownik/shared/presentation/index";
-import type { RegionState } from "@defensownik/shared/regions";
-import { Layer } from "@defensownik/shared/types/layers";
+import { LAYER_VISUALS } from "@wartownik/shared/config/layer-visuals";
+import { LAYER_CONFIG } from "@wartownik/shared/config/layers";
+import { presentPoint } from "@wartownik/shared/presentation/index";
+import type { RegionState } from "@wartownik/shared/regions";
+import { Layer } from "@wartownik/shared/types/layers";
 import type {
   LayerClusterWithLayer,
   LayerPoint,
-} from "@defensownik/shared/types/layers";
+} from "@wartownik/shared/types/layers";
 import type { FeatureCollection, Point } from "geojson";
 
 import { REGIONS } from "./regions";

@@ -1,4 +1,4 @@
-import type { Bounds } from "@defensownik/shared/types/map";
+import type { Bounds } from "@wartownik/shared/types/map";
 import { sql } from "drizzle-orm";
 
 export function envelope({ nw, se }: Bounds) {

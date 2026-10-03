@@ -1,7 +1,7 @@
 "use client";
 
-import { REGION_STATUS_VISUALS } from "@defensownik/shared/regions";
-import type { RegionState } from "@defensownik/shared/regions";
+import { REGION_STATUS_VISUALS } from "@wartownik/shared/regions";
+import type { RegionState } from "@wartownik/shared/regions";
 import { TriangleAlert } from "lucide-react";
 
 import { regionAlertText, sortedAlerts } from "./situation-card";

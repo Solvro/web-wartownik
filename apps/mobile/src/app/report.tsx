@@ -1,11 +1,11 @@
+import { onlineManager, useMutation } from "@tanstack/react-query";
 import {
   REPORT_DESCRIPTION_MAX_LENGTH,
   REPORT_EVENT_TYPES,
   REPORT_EVENT_TYPE_LABELS,
-} from "@defensownik/shared/config/reports";
-import type { ReportEventType } from "@defensownik/shared/config/reports";
-import type { ReportFormValues } from "@defensownik/shared/schemas/report";
-import { onlineManager, useMutation } from "@tanstack/react-query";
+} from "@wartownik/shared/config/reports";
+import type { ReportEventType } from "@wartownik/shared/config/reports";
+import type { ReportFormValues } from "@wartownik/shared/schemas/report";
 import { router } from "expo-router";
 import { useState } from "react";
 import {

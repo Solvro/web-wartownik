@@ -1,7 +1,7 @@
-import { CLUSTER_RADIUS_PX } from "@defensownik/shared/config/constants";
-import { degreesPerPixel } from "@defensownik/shared/geo/geo";
-import type { LayerCluster } from "@defensownik/shared/types/layers";
-import type { Viewport } from "@defensownik/shared/types/map";
+import { CLUSTER_RADIUS_PX } from "@wartownik/shared/config/constants";
+import { degreesPerPixel } from "@wartownik/shared/geo/geo";
+import type { LayerCluster } from "@wartownik/shared/types/layers";
+import type { Viewport } from "@wartownik/shared/types/map";
 import { sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
 

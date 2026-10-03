@@ -1,8 +1,8 @@
 "use client";
 
-import { motionModel } from "@defensownik/shared/motion";
-import type { LayerPoint } from "@defensownik/shared/types/layers";
-import type { Coordinates } from "@defensownik/shared/types/map";
+import { motionModel } from "@wartownik/shared/motion";
+import type { LayerPoint } from "@wartownik/shared/types/layers";
+import type { Coordinates } from "@wartownik/shared/types/map";
 import type {
   Feature,
   FeatureCollection,
