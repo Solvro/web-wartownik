@@ -1,0 +1,18 @@
+import { useQuery } from "@tanstack/react-query";
+import type { StyleSpecification } from "maplibre-gl";
+
+import { localizeStyle } from "@/lib/map/localize";
+import { MAP_STYLES } from "@/lib/map/styles";
+
+export function useBaseStyle(dark: boolean) {
+  const url = dark ? MAP_STYLES.dark : MAP_STYLES.light;
+  return useQuery({
+    queryKey: ["base-style", url],
+    queryFn: async ({ signal }) => {
+      const response = await fetch(url, { signal });
+      return localizeStyle((await response.json()) as StyleSpecification);
+    },
+    staleTime: Infinity,
+    gcTime: Infinity,
+  }).data;
+}

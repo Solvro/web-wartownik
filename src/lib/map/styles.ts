@@ -255,7 +255,7 @@ export const firesHeatmap: Omit<HeatmapLayerSpecification, "id" | "source"> = {
 
 const regionColor = [
   "match",
-  ["get", "status"],
+  ["coalesce", ["feature-state", "status"], "none"],
   "threat",
   REGION_STATUS_VISUALS.threat.color,
   "approaching",
@@ -268,7 +268,7 @@ const regionColor = [
 function regionOpacity(dark: boolean, scale: number): ExpressionSpecification {
   return [
     "match",
-    ["get", "status"],
+    ["coalesce", ["feature-state", "status"], "none"],
     "threat",
     0.32 * scale,
     "approaching",
@@ -301,7 +301,13 @@ function countryColor(dark: boolean): ExpressionSpecification {
   ];
 }
 
-const isQuiet: ExpressionSpecification = ["==", ["get", "status"], "none"];
+const regionStatus: ExpressionSpecification = [
+  "coalesce",
+  ["feature-state", "status"],
+  "none",
+];
+
+const isQuiet: ExpressionSpecification = ["==", regionStatus, "none"];
 
 export function regionFill(
   dark: boolean,
@@ -316,10 +322,10 @@ export function regionFill(
         ["zoom"],
         5,
         regionOpacity(dark, 1),
-        9,
-        regionOpacity(dark, 0.45),
-        12,
-        regionOpacity(dark, 0.15),
+        8,
+        regionOpacity(dark, 0.5),
+        9.5,
+        regionOpacity(dark, 0),
       ],
     },
   };
@@ -327,7 +333,18 @@ export function regionFill(
 
 export const regionHoverFill: Omit<FillLayerSpecification, "id" | "source"> = {
   type: "fill",
-  paint: { "fill-color": "#3b82f6", "fill-opacity": 0.08 },
+  paint: {
+    "fill-color": "#3b82f6",
+    "fill-opacity": [
+      "interpolate",
+      ["linear"],
+      ["zoom"],
+      5,
+      ["case", ["boolean", ["feature-state", "hover"], false], 0.1, 0],
+      7.5,
+      0,
+    ],
+  },
 };
 
 export function regionLine(
@@ -343,9 +360,9 @@ export function regionLine(
         ["linear"],
         ["zoom"],
         4,
-        ["case", ["==", ["get", "status"], "none"], 0.6, 2],
+        ["case", isQuiet, 0.6, 2],
         9,
-        ["case", ["==", ["get", "status"], "none"], 1.4, 3],
+        ["case", isQuiet, 1.4, 3],
       ],
     },
   };
@@ -373,7 +390,7 @@ export function countryGlow(
       "line-color": countryColor(dark),
       "line-width": ["interpolate", ["linear"], ["zoom"], 4, 6, 9, 12],
       "line-blur": 6,
-      "line-opacity": 0.35,
+      "line-opacity": ["interpolate", ["linear"], ["zoom"], 6, 0.35, 9, 0],
     },
   };
 }
@@ -391,6 +408,7 @@ export function regionLabel(
       "text-size": ["interpolate", ["linear"], ["zoom"], 4.5, 8, 8, 12],
       "text-letter-spacing": 0.12,
       "text-max-width": 8,
+      "text-padding": 6,
     },
     paint: {
       "text-color": dark ? "rgba(203,213,225,0.7)" : "rgba(51,65,85,0.65)",

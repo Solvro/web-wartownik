@@ -26,7 +26,7 @@ import {
   computeRegionStates,
   regionBounds,
 } from "@/lib/regions";
-import type { RegionCollection } from "@/lib/regions";
+import type { RegionCollection, RegionStatus } from "@/lib/regions";
 import { LAYERS, Layer } from "@/types/layers";
 import type { LayerPoint } from "@/types/layers";
 import type { Coordinates } from "@/types/map";
@@ -83,7 +83,6 @@ export function MapScreen() {
   const demo = useSearchParams().has("symulacja");
   const demoNow = useDemoNow(demo);
   const [selection, setSelection] = useState<Selection>(null);
-  const [hoveredRegionId, setHoveredRegionId] = useState<string | null>(null);
   const [layersOpen, setLayersOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [searchMarker, setSearchMarker] = useState<Coordinates | null>(null);
@@ -129,24 +128,19 @@ export function MapScreen() {
     [regionCollection, threats],
   );
 
-  const regions = useMemo<RegionCollection | null>(() => {
-    if (regionCollection === null) {
-      return null;
-    }
-    const statusById = new Map(
-      regionStates.map((state) => [state.id, state.status]),
-    );
-    return {
-      ...regionCollection,
-      features: regionCollection.features.map((feature) => ({
-        ...feature,
-        properties: {
-          ...feature.properties,
-          status: statusById.get(feature.properties.id) ?? "none",
-        },
-      })),
-    };
-  }, [regionCollection, regionStates]);
+  const regionStatusKey = regionStates
+    .map((state) => `${state.id}:${state.status}`)
+    .join("|");
+  const regionStatuses = useMemo<Record<string, RegionStatus>>(
+    () =>
+      Object.fromEntries(
+        regionStatusKey
+          .split("|")
+          .filter(Boolean)
+          .map((entry) => entry.split(":") as [string, RegionStatus]),
+      ),
+    [regionStatusKey],
+  );
 
   const selectedPoint =
     selection?.kind === "point"
@@ -291,7 +285,8 @@ export function MapScreen() {
         points={points}
         keys={keys}
         clusters={data.clusters}
-        regions={regions}
+        regions={regionCollection}
+        regionStatuses={regionStatuses}
         selectedKey={
           selectedPoint === null
             ? null
@@ -299,10 +294,8 @@ export function MapScreen() {
               ? selection.key
               : null
         }
-        hoveredRegionId={hoveredRegionId}
         onSelectPoint={selectPoint}
         onSelectRegion={openRegion}
-        onHoverRegion={setHoveredRegionId}
       />
 
       {isMobile ? (

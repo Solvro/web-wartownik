@@ -1,6 +1,6 @@
 "use client";
 
-import type { Feature, FeatureCollection, Point } from "geojson";
+import type { FeatureCollection, Point } from "geojson";
 import { MapPin } from "lucide-react";
 import type {
   GeoJSONSource,
@@ -18,18 +18,13 @@ import MapGL, {
 } from "react-map-gl/maplibre";
 import type { MapRef } from "react-map-gl/maplibre";
 
-import {
-  DEFAULT_CENTER,
-  DEFAULT_ZOOM,
-  POLAND_BOUNDS,
-} from "@/config/constants";
+import { POLAND_BOUNDS } from "@/config/constants";
+import { useBaseStyle } from "@/hooks/use-base-style";
 import { useMap } from "@/hooks/use-map";
 import { buildMapFeatures } from "@/lib/map/features";
 import { addMissingImage } from "@/lib/map/images";
-import { localizeBaseStyle } from "@/lib/map/localize";
 import {
   CLUSTER_PROPERTIES,
-  MAP_STYLES,
   arrowSymbol,
   clusterCircle,
   clusterCount,
@@ -55,7 +50,7 @@ import {
 } from "@/lib/map/styles";
 import { configureMapLibreWorker } from "@/lib/map/worker";
 import type { MapHandle } from "@/lib/providers/map-provider";
-import type { RegionCollection } from "@/lib/regions";
+import type { RegionCollection, RegionStatus } from "@/lib/regions";
 import type { LayerClusterWithLayer, LayerPoint } from "@/types/layers";
 import type { Coordinates } from "@/types/map";
 
@@ -82,10 +77,9 @@ interface MapCanvasProps {
   clusters: LayerClusterWithLayer[];
   regions: RegionCollection | null;
   selectedKey: string | null;
-  hoveredRegionId: string | null;
+  regionStatuses: Record<string, RegionStatus>;
   onSelectPoint(index: number): void;
   onSelectRegion(regionId: string): void;
-  onHoverRegion(regionId: string | null): void;
 }
 
 function createMapHandle(map: MapLibreMap): MapHandle {
@@ -94,10 +88,6 @@ function createMapHandle(map: MapLibreMap): MapHandle {
     fitBounds: (bounds, options) => map.fitBounds(bounds, options),
     zoomBy: (delta) => map.easeTo({ zoom: map.getZoom() + delta }),
   };
-}
-
-function firstSymbolLayerId(map: MapLibreMap): string | undefined {
-  return map.getStyle().layers.find((layer) => layer.type === "symbol")?.id;
 }
 
 export function MapCanvas({
@@ -111,10 +101,9 @@ export function MapCanvas({
   clusters,
   regions,
   selectedKey,
-  hoveredRegionId,
+  regionStatuses,
   onSelectPoint,
   onSelectRegion,
-  onHoverRegion,
 }: MapCanvasProps) {
   const { registerMap, setViewport, userLocation, locateUser } = useMap();
   const { resolvedTheme } = useTheme();
@@ -125,12 +114,21 @@ export function MapCanvas({
     const map = instance?.getMap();
     map?.setMissingStyleImageResolver((id) => addMissingImage(map, id));
   }, []);
-  const [labelLayerId, setLabelLayerId] = useState<string | undefined>();
-  const [cursor, setCursor] = useState("");
+  const baseStyle = useBaseStyle(dark);
+  const labelLayerId = useMemo(
+    () => baseStyle?.layers.find((layer) => layer.type === "symbol")?.id,
+    [baseStyle],
+  );
+  const hoveredRegionRef = useRef<string | null>(null);
+  const regionStatusesRef = useRef(regionStatuses);
   const [initialView] = useState(() => ({
-    longitude: DEFAULT_CENTER.lng,
-    latitude: DEFAULT_CENTER.lat,
-    zoom: DEFAULT_ZOOM,
+    bounds: [
+      [POLAND_BOUNDS.west, POLAND_BOUNDS.south],
+      [POLAND_BOUNDS.east, POLAND_BOUNDS.north],
+    ] as [[number, number], [number, number]],
+    fitBoundsOptions: {
+      padding: { top: 24, right: 24, bottom: 24, left: sidePadding + 24 },
+    },
   }));
 
   const features = useMemo(
@@ -231,8 +229,6 @@ export function MapCanvas({
       return;
     }
     registerMap(createMapHandle(map));
-    localizeBaseStyle(map);
-    setLabelLayerId(firstSymbolLayerId(map));
     map.setPadding({ top: 0, right: 0, bottom: 0, left: sidePadding });
     map.fitBounds(
       [
@@ -259,21 +255,6 @@ export function MapCanvas({
       duration: 300,
     });
   }, [sidePadding]);
-
-  useEffect(() => {
-    const map = mapRef.current?.getMap();
-    if (map === undefined) {
-      return;
-    }
-    const onStyle = () => {
-      localizeBaseStyle(map);
-      setLabelLayerId(firstSymbolLayerId(map));
-    };
-    map.on("style.load", onStyle);
-    return () => {
-      map.off("style.load", onStyle);
-    };
-  });
 
   const hasPulse = features.live.features.some(
     (feature) => feature.properties.pulse,
@@ -334,32 +315,88 @@ export function MapCanvas({
     [onSelectPoint, onSelectRegion],
   );
 
+  const setHoveredRegion = useCallback((regionId: string | null) => {
+    const map = mapRef.current?.getMap();
+    const previous = hoveredRegionRef.current;
+    if (map === undefined || previous === regionId) {
+      return;
+    }
+    if (map.getSource("regions") !== undefined) {
+      if (previous !== null) {
+        map.setFeatureState(
+          { source: "regions", id: previous },
+          { hover: false },
+        );
+      }
+      if (regionId !== null) {
+        map.setFeatureState(
+          { source: "regions", id: regionId },
+          { hover: true },
+        );
+      }
+    }
+    hoveredRegionRef.current = regionId;
+  }, []);
+
   const handleMouseMove = useCallback(
     (event: MapLayerMouseEvent) => {
       const feature = event.features?.[0];
-      const isRegion = feature?.layer.id === "regions-fill";
-      setCursor(feature === undefined ? "" : "pointer");
-      onHoverRegion(
-        isRegion ? String((feature.properties as { id: string }).id) : null,
+      event.target.getCanvas().style.cursor =
+        feature === undefined ? "" : "pointer";
+      setHoveredRegion(
+        feature?.layer.id === "regions-fill"
+          ? String((feature.properties as { id: string }).id)
+          : null,
       );
     },
-    [onHoverRegion],
+    [setHoveredRegion],
   );
 
-  const hoveredRegion = useMemo<FeatureCollection | null>(() => {
-    const feature = regions?.features.find(
-      (region) => region.properties.id === hoveredRegionId,
-    );
-    return feature === undefined
-      ? null
-      : { type: "FeatureCollection", features: [feature as Feature] };
-  }, [regions, hoveredRegionId]);
+  const applyRegionStatuses = useCallback((map: MapLibreMap) => {
+    if (map.getSource("regions") === undefined) {
+      return;
+    }
+    for (const [id, status] of Object.entries(regionStatusesRef.current)) {
+      map.setFeatureState({ source: "regions", id }, { status });
+    }
+  }, []);
+
+  useEffect(() => {
+    regionStatusesRef.current = regionStatuses;
+    const map = mapRef.current?.getMap();
+    if (map !== undefined) {
+      applyRegionStatuses(map);
+    }
+  }, [regionStatuses, applyRegionStatuses]);
+
+  useEffect(() => {
+    const map = mapRef.current?.getMap();
+    if (map === undefined) {
+      return;
+    }
+    const onSourceData = (event: {
+      sourceId?: string;
+      isSourceLoaded?: boolean;
+    }) => {
+      if (event.sourceId === "regions" && event.isSourceLoaded === true) {
+        applyRegionStatuses(map);
+      }
+    };
+    map.on("sourcedata", onSourceData);
+    return () => {
+      map.off("sourcedata", onSourceData);
+    };
+  }, [applyRegionStatuses, regions]);
+
+  if (baseStyle === undefined) {
+    return <div className="absolute inset-0 animate-pulse bg-muted" />;
+  }
 
   return (
     <MapGL
       ref={setMapRef}
       initialViewState={initialView}
-      mapStyle={dark ? MAP_STYLES.dark : MAP_STYLES.light}
+      mapStyle={baseStyle}
       style={{ position: "absolute", inset: 0 }}
       minZoom={3}
       maxZoom={18}
@@ -368,20 +405,19 @@ export function MapCanvas({
       touchPitch={false}
       attributionControl={false}
       interactiveLayerIds={INTERACTIVE_LAYERS}
-      cursor={cursor}
       onLoad={handleLoad}
       onMoveEnd={(event) => reportViewport(event.target)}
       onClick={(event) => void handleClick(event)}
       onMouseMove={handleMouseMove}
-      onMouseLeave={() => {
-        setCursor("");
-        onHoverRegion(null);
+      onMouseLeave={(event) => {
+        event.target.getCanvas().style.cursor = "";
+        setHoveredRegion(null);
       }}
     >
       <AttributionControl compact position="bottom-right" />
 
       {regions === null ? null : (
-        <Source id="regions" type="geojson" data={regions}>
+        <Source id="regions" type="geojson" data={regions} promoteId="id">
           <Layer
             id="regions-fill"
             beforeId={labelLayerId}
@@ -392,18 +428,16 @@ export function MapCanvas({
             beforeId={labelLayerId}
             {...regionLine(dark)}
           />
-          <Layer id="regions-label" {...regionLabel(dark)} />
-        </Source>
-      )}
-      {hoveredRegion === null ? null : (
-        <Source id="region-hover" type="geojson" data={hoveredRegion}>
           <Layer
-            id="region-hover-fill"
+            id="regions-hover"
             beforeId={labelLayerId}
             {...regionHoverFill}
           />
         </Source>
       )}
+      <Source id="region-labels" type="geojson" data="/geo/region-labels.json">
+        <Layer id="regions-label" {...regionLabel(dark)} />
+      </Source>
       <Source id="countries" type="geojson" data="/geo/countries.json">
         <Layer
           id="countries-glow"

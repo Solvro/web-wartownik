@@ -7,10 +7,9 @@ import { useState } from "react";
 import MapGL, { Marker } from "react-map-gl/maplibre";
 import type { MapRef } from "react-map-gl/maplibre";
 
+import { useBaseStyle } from "@/hooks/use-base-style";
 import { useMap } from "@/hooks/use-map";
 import { addMissingImage } from "@/lib/map/images";
-import { localizeBaseStyle } from "@/lib/map/localize";
-import { MAP_STYLES } from "@/lib/map/styles";
 import { configureMapLibreWorker } from "@/lib/map/worker";
 import type { Coordinates } from "@/types/map";
 
@@ -27,6 +26,7 @@ export function LocationPicker({
 }) {
   const { center, zoom, userLocation } = useMap();
   const { resolvedTheme } = useTheme();
+  const baseStyle = useBaseStyle(resolvedTheme !== "light");
   const [initialView] = useState(() => {
     const start = value ?? userLocation ?? center;
     return {
@@ -36,15 +36,18 @@ export function LocationPicker({
     };
   });
 
+  if (baseStyle === undefined) {
+    return <div className="size-full animate-pulse bg-muted" />;
+  }
+
   return (
     <MapGL
       ref={(instance: MapRef | null) => {
         const map = instance?.getMap();
         map?.setMissingStyleImageResolver((id) => addMissingImage(map, id));
       }}
-      onLoad={(event) => localizeBaseStyle(event.target)}
       initialViewState={initialView}
-      mapStyle={resolvedTheme === "light" ? MAP_STYLES.light : MAP_STYLES.dark}
+      mapStyle={baseStyle}
       style={{ width: "100%", height: "100%" }}
       dragRotate={false}
       attributionControl={false}
