@@ -1,10 +1,21 @@
-import type {
-  ExpressionSpecification,
-  LayerSpecification,
-  StyleSpecification,
-} from "maplibre-gl";
+type Expression = unknown[];
 
-const POLISH_NAME: ExpressionSpecification = [
+interface StyleLayer {
+  id: string;
+  type: string;
+  layout?: Record<string, unknown>;
+}
+
+interface Style {
+  layers: StyleLayer[];
+}
+
+export const BASE_MAP_STYLES = {
+  light: "https://tiles.openfreemap.org/styles/positron",
+  dark: "https://tiles.openfreemap.org/styles/dark",
+} as const;
+
+const POLISH_NAME: Expression = [
   "coalesce",
   ["get", "name:pl"],
   ["get", "name:latin"],
@@ -13,7 +24,7 @@ const POLISH_NAME: ExpressionSpecification = [
 
 const HIDDEN_LAYER = /place_state|label_state|state_label|admin_1/;
 
-function localizeLayer(layer: LayerSpecification): LayerSpecification {
+function localizeLayer<L extends StyleLayer>(layer: L): L {
   if (layer.type !== "symbol") {
     return layer;
   }
@@ -27,6 +38,6 @@ function localizeLayer(layer: LayerSpecification): LayerSpecification {
   return layer;
 }
 
-export function localizeStyle(style: StyleSpecification): StyleSpecification {
+export function localizeStyle<S extends Style>(style: S): S {
   return { ...style, layers: style.layers.map(localizeLayer) };
 }

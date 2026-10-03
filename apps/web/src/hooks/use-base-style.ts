@@ -1,7 +1,7 @@
+import { localizeStyle } from "@defensownik/shared/map-style";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type { StyleSpecification } from "maplibre-gl";
 
-import { localizeStyle } from "@/lib/map/localize";
 import { MAP_STYLES } from "@/lib/map/styles";
 
 export function useBaseStyle(dark: boolean) {
