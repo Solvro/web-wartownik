@@ -10,6 +10,21 @@ const ALLOWED_PREFIXES = [
 ];
 const DEFAULT_CACHE = "public, max-age=86400";
 
+function publicOrigin(request: NextRequest) {
+  const host = (
+    request.headers.get("x-forwarded-host") ?? request.headers.get("host")
+  )
+    ?.split(",")[0]
+    ?.trim();
+  if (host === undefined || host === "") {
+    return request.nextUrl.origin;
+  }
+  const proto =
+    request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim() ??
+    request.nextUrl.protocol.replace(":", "");
+  return `${proto}://${host}`;
+}
+
 export async function GET(
   request: NextRequest,
   ctx: RouteContext<"/api/map/[...path]">,
@@ -32,7 +47,7 @@ export async function GET(
   };
 
   if (contentType.includes("json")) {
-    const proxyBase = `${request.nextUrl.origin}/api/map/`;
+    const proxyBase = `${publicOrigin(request)}/api/map/`;
     const body = (await upstream.text()).replaceAll(UPSTREAM, proxyBase);
     return new Response(body, { headers });
   }
