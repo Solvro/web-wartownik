@@ -62,10 +62,10 @@ export function SituationCard({
 
   return (
     <section
-      className="overflow-hidden rounded-xl border"
+      className="overflow-hidden rounded-xl border bg-background"
       style={{
         borderColor: `color-mix(in srgb, ${color} 35%, transparent)`,
-        background: `linear-gradient(135deg, color-mix(in srgb, ${color} 14%, transparent), transparent 70%)`,
+        backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${color} 14%, transparent), transparent 70%)`,
       }}
     >
       <div className="flex items-start gap-3 p-3">
