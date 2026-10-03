@@ -232,6 +232,7 @@ export function MapScreen() {
   return (
     <main className="fixed inset-0 overflow-hidden">
       <MapCanvas
+        sidePadding={isMobile ? 0 : 392}
         points={points}
         keys={keys}
         clusters={data.clusters}

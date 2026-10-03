@@ -20,6 +20,7 @@ import { DEFAULT_CENTER, DEFAULT_ZOOM } from "@/config/constants";
 import { useMap } from "@/hooks/use-map";
 import { buildMapFeatures } from "@/lib/map/features";
 import { addMissingImage } from "@/lib/map/images";
+import { localizeBaseStyle } from "@/lib/map/localize";
 import {
   CLUSTER_PROPERTIES,
   MAP_STYLES,
@@ -60,6 +61,7 @@ const INTERACTIVE_LAYERS = [
 const PULSE_PERIOD_MS = 1600;
 
 interface MapCanvasProps {
+  sidePadding: number;
   points: LayerPoint[];
   keys: string[];
   clusters: LayerClusterWithLayer[];
@@ -76,6 +78,7 @@ function firstSymbolLayerId(map: MapLibreMap): string | undefined {
 }
 
 export function MapCanvas({
+  sidePadding,
   points,
   keys,
   clusters,
@@ -175,19 +178,30 @@ export function MapCanvas({
       fitBounds: (bounds, options) => map.fitBounds(bounds, options),
       zoomBy: (delta) => map.easeTo({ zoom: map.getZoom() + delta }),
     });
+    localizeBaseStyle(map);
     setLabelLayerId(firstSymbolLayerId(map));
+    map.setPadding({ top: 0, right: 0, bottom: 0, left: sidePadding });
     reportViewport(map);
     void locateUser();
-  }, [registerMap, reportViewport, locateUser]);
+  }, [registerMap, reportViewport, locateUser, sidePadding]);
 
   useEffect(() => () => registerMap(null), [registerMap]);
+
+  useEffect(() => {
+    mapRef.current
+      ?.getMap()
+      .setPadding({ top: 0, right: 0, bottom: 0, left: sidePadding });
+  }, [sidePadding]);
 
   useEffect(() => {
     const map = mapRef.current?.getMap();
     if (map === undefined) {
       return;
     }
-    const onStyle = () => setLabelLayerId(firstSymbolLayerId(map));
+    const onStyle = () => {
+      localizeBaseStyle(map);
+      setLabelLayerId(firstSymbolLayerId(map));
+    };
     map.on("style.load", onStyle);
     return () => {
       map.off("style.load", onStyle);
