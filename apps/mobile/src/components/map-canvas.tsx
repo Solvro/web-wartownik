@@ -114,12 +114,50 @@ const regionLabel: SymbolLayerSpecification["layout"] = {
   "text-max-width": 8,
 };
 
+const CLUSTERED_SLUGS = ["shelters", "aeds", "smog", "floods", "reports"];
+const CLUSTERED_COLORS: Record<string, string> = {
+  shelters: "#059669",
+  aeds: "#e11d48",
+  smog: "#65a30d",
+  floods: "#2563eb",
+  reports: "#7c3aed",
+};
+
+const CLUSTER_PROPERTIES = Object.fromEntries([
+  ["total", ["+", ["get", "w"]]],
+  ...CLUSTERED_SLUGS.map((slug) => [
+    `s_${slug}`,
+    ["+", ["case", ["==", ["get", "layer"], slug], ["get", "w"], 0]],
+  ]),
+]) as Record<string, ExpressionSpecification>;
+
+const layerSum = (slug: string) => ["coalesce", ["get", `s_${slug}`], 0];
+const maxSum = ["max", ...CLUSTERED_SLUGS.map(layerSum)];
+const dominantColor = expr([
+  "case",
+  ["has", "point_count"],
+  [
+    "case",
+    ...CLUSTERED_SLUGS.flatMap((slug) => [
+      ["==", layerSum(slug), maxSum],
+      CLUSTERED_COLORS[slug],
+    ]),
+    colors.primary,
+  ],
+  ["coalesce", ["get", "color"], colors.primary],
+]);
+
 const isCluster = expr([
   "any",
   ["has", "point_count"],
   ["==", ["get", "server"], true],
 ]);
-const clusterTotal = expr(["coalesce", ["get", "total"], ["get", "w"]]);
+const clusterTotal = expr([
+  "coalesce",
+  ["get", "total"],
+  ["get", "point_count"],
+  ["get", "w"],
+]);
 
 const clusterCircle: CircleLayerSpecification["paint"] = {
   "circle-color": colors.background,
@@ -138,7 +176,7 @@ const clusterCircle: CircleLayerSpecification["paint"] = {
     22,
   ]),
   "circle-stroke-width": 2.5,
-  "circle-stroke-color": expr(["coalesce", ["get", "color"], colors.primary]),
+  "circle-stroke-color": dominantColor,
 };
 
 const clusterCount: SymbolLayerSpecification["layout"] = {
@@ -303,6 +341,7 @@ export const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(
           cluster
           clusterRadius={46}
           clusterMaxZoom={13}
+          clusterProperties={CLUSTER_PROPERTIES}
           onPress={({ nativeEvent }) =>
             void handlePointPress(nativeEvent.features[0])
           }
