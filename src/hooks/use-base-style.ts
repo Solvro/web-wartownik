@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type { StyleSpecification } from "maplibre-gl";
 
 import { localizeStyle } from "@/lib/map/localize";
@@ -14,5 +14,6 @@ export function useBaseStyle(dark: boolean) {
     },
     staleTime: Infinity,
     gcTime: Infinity,
+    placeholderData: keepPreviousData,
   }).data;
 }

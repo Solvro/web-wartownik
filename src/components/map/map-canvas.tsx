@@ -110,8 +110,12 @@ export function MapCanvas({
   const { resolvedTheme } = useTheme();
   const dark = resolvedTheme !== "light";
   const mapRef = useRef<MapRef | null>(null);
+  const [mapReady, setMapReady] = useState(false);
   const setMapRef = useCallback((instance: MapRef | null) => {
     mapRef.current = instance;
+    if (instance === null) {
+      setMapReady(false);
+    }
     const map = instance?.getMap();
     map?.setMissingStyleImageResolver((id) => addMissingImage(map, id));
   }, []);
@@ -230,6 +234,7 @@ export function MapCanvas({
       return;
     }
     registerMap(createMapHandle(map));
+    setMapReady(true);
     map.setPadding({ top: 0, right: 0, bottom: 0, left: sidePadding });
     map.fitBounds(
       [
@@ -281,7 +286,7 @@ export function MapCanvas({
     };
     frame = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(frame);
-  }, [hasPulse]);
+  }, [hasPulse, mapReady]);
 
   const handleClick = useCallback(
     async (event: MapLayerMouseEvent) => {
@@ -368,7 +373,7 @@ export function MapCanvas({
     if (map !== undefined) {
       applyRegionStatuses(map);
     }
-  }, [regionStatuses, applyRegionStatuses]);
+  }, [regionStatuses, applyRegionStatuses, mapReady]);
 
   useEffect(() => {
     const map = mapRef.current?.getMap();
@@ -387,7 +392,7 @@ export function MapCanvas({
     return () => {
       map.off("sourcedata", onSourceData);
     };
-  }, [applyRegionStatuses, regions]);
+  }, [applyRegionStatuses, regions, mapReady]);
 
   if (baseStyle === undefined) {
     return <div className="absolute inset-0 animate-pulse bg-muted" />;
