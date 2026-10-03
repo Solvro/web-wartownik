@@ -12,6 +12,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { GEO_URLS } from "@/config/geo";
 import { useAircraftDetails } from "@/hooks/use-aircraft-details";
 import { useLayerData } from "@/hooks/use-layer-data";
 import { useMap } from "@/hooks/use-map";
@@ -94,9 +95,9 @@ export function MapScreen() {
   const data = useLayerData(enabledLayers, viewport);
 
   const { data: regionCollection = null } = useQuery({
-    queryKey: ["regions-geometry"],
+    queryKey: ["regions-geometry", GEO_URLS.regions],
     queryFn: async () =>
-      (await (await fetch("/geo/regions.json")).json()) as RegionCollection,
+      (await (await fetch(GEO_URLS.regions)).json()) as RegionCollection,
     staleTime: Infinity,
   });
 

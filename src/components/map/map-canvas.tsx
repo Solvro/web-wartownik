@@ -19,6 +19,7 @@ import MapGL, {
 import type { MapRef } from "react-map-gl/maplibre";
 
 import { POLAND_BOUNDS } from "@/config/constants";
+import { GEO_URLS } from "@/config/geo";
 import { useBaseStyle } from "@/hooks/use-base-style";
 import { useMap } from "@/hooks/use-map";
 import { buildMapFeatures } from "@/lib/map/features";
@@ -435,10 +436,10 @@ export function MapCanvas({
           />
         </Source>
       )}
-      <Source id="region-labels" type="geojson" data="/geo/region-labels.json">
+      <Source id="region-labels" type="geojson" data={GEO_URLS.regionLabels}>
         <Layer id="regions-label" {...regionLabel(dark)} />
       </Source>
-      <Source id="countries" type="geojson" data="/geo/countries.json">
+      <Source id="countries" type="geojson" data={GEO_URLS.countries}>
         <Layer
           id="countries-glow"
           beforeId={labelLayerId}
