@@ -283,6 +283,7 @@ export const COUNTRY_COLORS = {
   PL: { label: "Polska", dark: "#60a5fa", light: "#2563eb" },
   UA: { label: "Ukraina", dark: "#2dd4bf", light: "#0d9488" },
   BY: { label: "Białoruś", dark: "#c084fc", light: "#9333ea" },
+  RU: { label: "Rosja", dark: "#a8a29e", light: "#78716c" },
 } as const;
 
 function countryColor(dark: boolean): ExpressionSpecification {
@@ -294,6 +295,8 @@ function countryColor(dark: boolean): ExpressionSpecification {
     COUNTRY_COLORS.UA[theme],
     "BY",
     COUNTRY_COLORS.BY[theme],
+    "RU",
+    COUNTRY_COLORS.RU[theme],
     COUNTRY_COLORS.PL[theme],
   ];
 }

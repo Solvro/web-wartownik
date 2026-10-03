@@ -16,8 +16,9 @@ import type { Bounds, Coordinates } from "@/types/map";
 
 export type RegionStatus = "threat" | "approaching" | "watch" | "none";
 
-export type RegionCountry = "PL" | "UA" | "BY";
-export type RegionKind = "voivodeship" | "oblast" | "city" | "republic";
+export type RegionCountry = "PL" | "UA" | "BY" | "RU";
+export type RegionKind =
+  "voivodeship" | "oblast" | "city" | "republic" | "krai";
 
 export interface RegionProperties {
   id: string;
@@ -31,7 +32,15 @@ export const REGION_KIND_LABELS: Record<RegionKind, string> = {
   voivodeship: "Województwo",
   oblast: "Obwód",
   city: "Miasto wydzielone",
-  republic: "Republika autonomiczna",
+  republic: "Republika",
+  krai: "Kraj",
+};
+
+export const REGION_COUNTRY_LABELS: Record<RegionCountry, string> = {
+  PL: "Polska",
+  UA: "Ukraina",
+  BY: "Białoruś",
+  RU: "Rosja",
 };
 
 export type RegionFeature = Feature<Polygon | MultiPolygon, RegionProperties>;

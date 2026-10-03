@@ -5,7 +5,11 @@ import { Maximize2, X } from "lucide-react";
 import { Icon } from "@/components/icon";
 import { Button } from "@/components/ui/button";
 import { THREAT_VISUALS } from "@/config/presentation";
-import { REGION_KIND_LABELS, REGION_STATUS_VISUALS } from "@/lib/regions";
+import {
+  REGION_COUNTRY_LABELS,
+  REGION_KIND_LABELS,
+  REGION_STATUS_VISUALS,
+} from "@/lib/regions";
 import type { RegionState } from "@/lib/regions";
 import type { Layer, LayerLocation } from "@/types/layers";
 
@@ -34,9 +38,7 @@ export function RegionContent({
             {REGION_KIND_LABELS[region.kind]}
             {region.country === "PL"
               ? null
-              : region.country === "UA"
-                ? " · Ukraina"
-                : " · Białoruś"}
+              : ` · ${REGION_COUNTRY_LABELS[region.country]}`}
           </p>
           <h2 className="text-lg leading-tight font-semibold">{region.name}</h2>
           <span
