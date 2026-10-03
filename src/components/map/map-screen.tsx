@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Layers, Megaphone } from "lucide-react";
+import { Layers, Megaphone, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -15,9 +15,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useLayerData } from "@/hooks/use-layer-data";
 import { useMap } from "@/hooks/use-map";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useStoredFlag } from "@/hooks/use-stored-flag";
 import { demoThreats } from "@/lib/demo";
 import { pointKeys } from "@/lib/map/features";
-import { computeRegionStates, regionBounds } from "@/lib/regions";
+import {
+  REGION_STATUS_VISUALS,
+  computeRegionStates,
+  regionBounds,
+} from "@/lib/regions";
 import type { RegionCollection } from "@/lib/regions";
 import { LAYERS, Layer } from "@/types/layers";
 import type { LayerPoint } from "@/types/layers";
@@ -29,7 +34,7 @@ import { LayerList } from "./layer-list";
 import { MapControls } from "./map-controls";
 import { RegionContent } from "./region-panel";
 import { SearchBox } from "./search-box";
-import { SituationCard } from "./situation-card";
+import { SituationCard, sortedAlerts } from "./situation-card";
 import { StatusStrip } from "./status-strip";
 
 const MapCanvas = dynamic(
@@ -78,6 +83,10 @@ export function MapScreen() {
   const [layersOpen, setLayersOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [searchMarker, setSearchMarker] = useState<Coordinates | null>(null);
+  const [panelOpen, setPanelOpen] = useStoredFlag(
+    "defensownik-panel-open",
+    true,
+  );
 
   const data = useLayerData(enabledLayers, viewport);
 
@@ -196,6 +205,12 @@ export function MapScreen() {
     [threats, flyTo],
   );
 
+  const topAlert = sortedAlerts(regionStates)[0];
+  const collapsedAlertColor =
+    topAlert === undefined
+      ? null
+      : REGION_STATUS_VISUALS[topAlert.status].color;
+
   const loadingLayers = data.isFetching
     ? LAYERS.filter(
         (layer) => enabledLayers[layer] && data.updatedAt[layer] === undefined,
@@ -237,7 +252,7 @@ export function MapScreen() {
   return (
     <main className="fixed inset-0 overflow-hidden">
       <MapCanvas
-        sidePadding={isMobile ? 0 : 392}
+        sidePadding={isMobile || !panelOpen ? 0 : 392}
         searchMarker={searchMarker}
         points={points}
         keys={keys}
@@ -332,14 +347,33 @@ export function MapScreen() {
         </>
       ) : (
         <>
+          {panelOpen ? null : (
+            <CollapsedPanel
+              alertColor={collapsedAlertColor}
+              onOpen={() => setPanelOpen(true)}
+            />
+          )}
           <aside
-            className={`${panelClass} absolute top-3 bottom-3 left-3 z-20 flex w-[380px] flex-col`}
+            aria-hidden={!panelOpen}
+            inert={!panelOpen}
+            className={`${panelClass} absolute top-3 bottom-3 left-3 z-20 flex w-[380px] flex-col transition-[translate,opacity] duration-300 ${panelOpen ? "" : "pointer-events-none -translate-x-[calc(100%+1rem)] opacity-0"}`}
           >
             <div className="flex items-center justify-between gap-2 p-4 pb-3">
               <Link href="/">
                 <Brand />
               </Link>
-              <ThemeToggle />
+              <div className="flex items-center">
+                <ThemeToggle />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setPanelOpen(false)}
+                  tooltip="Ukryj panel"
+                  aria-label="Ukryj panel"
+                >
+                  <PanelLeftClose />
+                </Button>
+              </div>
             </div>
             <div className="px-4 pb-3">
               <SearchBox onSelectResult={setSearchMarker} />
@@ -364,7 +398,9 @@ export function MapScreen() {
             </div>
           </aside>
 
-          <div className="pointer-events-none absolute top-3 right-3 left-[404px] z-10 flex flex-col items-center gap-2">
+          <div
+            className={`pointer-events-none absolute top-3 right-3 ${panelOpen ? "left-[404px]" : "left-3"} z-10 flex flex-col items-center gap-2 transition-[left] duration-300`}
+          >
             <AlertBar
               regions={regionStates}
               onSelectRegion={openRegionAndZoom}
@@ -381,7 +417,7 @@ export function MapScreen() {
           )}
 
           <StatusStrip
-            className="absolute right-3 bottom-12 left-[404px] z-10"
+            className={`absolute right-3 bottom-12 z-10 transition-[left] duration-300 ${panelOpen ? "left-[404px]" : "left-3"}`}
             isFetching={data.isFetching}
             isLocating={isLocating}
             failedLayers={data.failedLayers}
@@ -395,6 +431,32 @@ export function MapScreen() {
         <ReportDialog open={reportOpen} onOpenChange={setReportOpen} />
       ) : null}
     </main>
+  );
+}
+
+function CollapsedPanel({
+  alertColor,
+  onOpen,
+}: {
+  alertColor: string | null;
+  onOpen(): void;
+}) {
+  return (
+    <div
+      className={`${panelClass} absolute top-3 left-3 z-20 flex animate-in items-center gap-1 p-1.5 fade-in slide-in-from-left-2`}
+    >
+      <Link href="/" aria-label="Defensownik" className="px-1">
+        <Brand className="[&>span:last-child]:hidden" />
+      </Link>
+      <Button variant="ghost" onClick={onOpen} className="gap-2">
+        <PanelLeftOpen />
+        Pokaż panel
+        <span
+          className="size-2 rounded-full"
+          style={{ backgroundColor: alertColor ?? "#16a34a" }}
+        />
+      </Button>
+    </div>
   );
 }
 
