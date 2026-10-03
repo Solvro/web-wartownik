@@ -7,6 +7,7 @@ import { getDb } from "../db";
 import { getAircraftDetails } from "../services/aircraft-details";
 import { searchPlaces } from "../services/geocode";
 import { getOfflinePack } from "../services/offline";
+import { getThreatHistory } from "../services/threat-history";
 import { getThreatTrack } from "../services/threat-track";
 import { getUkraineAlerts } from "../services/ukraine-alerts";
 import { publicProcedure, router, setCacheControl } from "../trpc";
@@ -49,6 +50,21 @@ export const aircraftRouter = router({
 });
 
 export const threatsRouter = router({
+  history: publicProcedure
+    .input(z.object({ hours: z.number().int().min(1).max(48).default(24) }))
+    .query(async ({ input, ctx }) => {
+      try {
+        const to = Date.now();
+        const history = await getThreatHistory(
+          to - input.hours * 3_600_000,
+          to,
+        );
+        setCacheControl(ctx, "public, max-age=30, stale-while-revalidate=60");
+        return history;
+      } catch (error) {
+        throw gateway("Failed to fetch threat history", error);
+      }
+    }),
   track: publicProcedure
     .input(z.object({ id: z.string().regex(/^[\w-]{1,64}$/) }))
     .query(async ({ input, ctx }) => {

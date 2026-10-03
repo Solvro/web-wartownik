@@ -46,6 +46,7 @@ interface SituationCardProps {
   threatCount: number;
   updatedAt: number | undefined;
   demo: boolean;
+  historical?: boolean;
   onSelectRegion(regionId: string): void;
 }
 
@@ -54,6 +55,7 @@ export function SituationCard({
   threatCount,
   updatedAt,
   demo,
+  historical = false,
   onSelectRegion,
 }: SituationCardProps) {
   const alerts = sortedAlerts(regions);
@@ -90,10 +92,14 @@ export function SituationCard({
           </p>
           <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
             <span className="relative flex size-1.5">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-500 opacity-75" />
-              <span className="relative inline-flex size-1.5 rounded-full bg-emerald-500" />
+              {historical ? null : (
+                <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-500 opacity-75" />
+              )}
+              <span
+                className={`relative inline-flex size-1.5 rounded-full ${historical ? "bg-blue-500" : "bg-emerald-500"}`}
+              />
             </span>
-            Na żywo
+            {historical ? "Historia" : "Na żywo"}
             {updatedAt === undefined
               ? null
               : ` · ${timeFormat.format(updatedAt)}`}

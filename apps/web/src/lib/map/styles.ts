@@ -533,3 +533,28 @@ export const ukraineAlertLine: Omit<LineLayerSpecification, "id" | "source"> = {
     ],
   },
 };
+
+export function trailCasing(
+  dark: boolean,
+): Omit<LineLayerSpecification, "id" | "source"> {
+  return {
+    type: "line",
+    filter: ["get", "active"],
+    layout: { "line-cap": "round", "line-join": "round" },
+    paint: {
+      "line-color": dark ? "#020617" : "#ffffff",
+      "line-width": 4.5,
+      "line-opacity": 0.5,
+    },
+  };
+}
+
+export const trailLine: Omit<LineLayerSpecification, "id" | "source"> = {
+  type: "line",
+  layout: { "line-cap": "round", "line-join": "round" },
+  paint: {
+    "line-color": ["get", "color"],
+    "line-width": ["case", ["get", "active"], 2.5, 1.5],
+    "line-opacity": ["case", ["get", "active"], 0.95, 0.35],
+  },
+};

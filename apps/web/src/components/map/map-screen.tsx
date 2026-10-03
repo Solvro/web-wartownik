@@ -9,8 +9,13 @@ import {
   regionBounds,
 } from "@wartownik/shared/regions";
 import type { RegionCollection, RegionStatus } from "@wartownik/shared/regions";
+import {
+  isTrackVisibleAt,
+  threatsAt,
+  trackPathUntil,
+} from "@wartownik/shared/threat-history";
 import { LAYERS, Layer } from "@wartownik/shared/types/layers";
-import type { LayerPoint } from "@wartownik/shared/types/layers";
+import type { LayerLocation, LayerPoint } from "@wartownik/shared/types/layers";
 import type { Coordinates } from "@wartownik/shared/types/map";
 import { Layers, Megaphone, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -29,6 +34,7 @@ import { useLayerData } from "@/hooks/use-layer-data";
 import { useMap } from "@/hooks/use-map";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useStoredFlag } from "@/hooks/use-stored-flag";
+import { useThreatHistory } from "@/hooks/use-threat-history";
 import { useThreatTrack } from "@/hooks/use-threat-track";
 import { pointKeys } from "@/lib/map/features";
 import { useTRPC } from "@/lib/trpc";
@@ -37,11 +43,18 @@ import { AlertBar } from "./alert-bar";
 import { BorderLegend } from "./border-legend";
 import { DetailsContent } from "./details-panel";
 import { LayerList } from "./layer-list";
+import type { MapTrail } from "./map-canvas";
 import { MapControls } from "./map-controls";
 import { RegionContent } from "./region-panel";
 import { SearchBox } from "./search-box";
 import { SituationCard, sortedAlerts } from "./situation-card";
 import { StatusStrip } from "./status-strip";
+import {
+  TIMELINE_SPEEDS,
+  Timeline,
+  TimelineButton,
+  usePlayback,
+} from "./timeline";
 import { UkraineAlertContent, UkraineAlertsToggle } from "./ukraine-alerts";
 
 const MapCanvas = dynamic(
@@ -106,6 +119,90 @@ export function MapScreen() {
 
   const data = useLayerData(enabledLayers, viewport);
 
+  const [timelineOpen, setTimelineOpen] = useState(false);
+  const [timelineHours, setTimelineHours] = useState<number>(24);
+  const [timelineSpeed, setTimelineSpeed] = useState<number>(
+    TIMELINE_SPEEDS[1],
+  );
+  const [timelinePlaying, setTimelinePlaying] = useState(false);
+  const [timelinePick, setTimelinePick] = useState<number | null>(null);
+  const threatHistory = useThreatHistory(timelineHours, timelineOpen);
+  const historyData = timelineOpen ? threatHistory.data : undefined;
+  const [timelineOpenedAt, setTimelineOpenedAt] = useState(0);
+  const historyTo = historyData?.to ?? timelineOpenedAt;
+  const historyFrom = historyData?.from ?? historyTo;
+  const firstActivity = useMemo(
+    () =>
+      historyData?.tracks.reduce(
+        (earliest, track) =>
+          Math.min(earliest, track.samples[0]?.[2] ?? Infinity),
+        Infinity,
+      ) ?? Infinity,
+    [historyData],
+  );
+  const timelineTime = Math.min(
+    Math.max(
+      timelinePick ??
+        (Number.isFinite(firstActivity) ? firstActivity : historyTo),
+      historyFrom,
+    ),
+    historyTo,
+  );
+  const setTimelineTime = setTimelinePick;
+  usePlayback({
+    playing: timelinePlaying,
+    speed: timelineSpeed,
+    onTick: (delta) => {
+      const next = timelineTime + delta;
+      if (next >= historyTo) {
+        setTimelineTime(historyTo);
+        setTimelinePlaying(false);
+      } else {
+        setTimelineTime(next);
+      }
+    },
+  });
+  const openTimeline = () => {
+    setTimelineOpen(true);
+    setTimelineOpenedAt(Date.now());
+    setTimelinePick(null);
+    setSelection(null);
+    setLayersOpen(false);
+  };
+  const closeTimeline = () => {
+    setTimelineOpen(false);
+    setTimelinePlaying(false);
+    setSelection(null);
+  };
+  const historicalThreats = useMemo(
+    () =>
+      historyData === undefined ? null : threatsAt(historyData, timelineTime),
+    [historyData, timelineTime],
+  );
+  const trails = useMemo<MapTrail[]>(() => {
+    if (historyData === undefined) {
+      return [];
+    }
+    return historyData.tracks.flatMap((track) => {
+      if ((track.samples[0]?.[2] ?? Infinity) > timelineTime) {
+        return [];
+      }
+      const color = presentPoint({
+        layer: Layer.Drones,
+        lat: track.samples[0][0],
+        lng: track.samples[0][1],
+        meta: { type: track.type } as LayerLocation<Layer.Drones>["meta"],
+      }).color;
+      return [
+        {
+          coordinates: trackPathUntil(track, timelineTime),
+          color,
+          active: isTrackVisibleAt(track, timelineTime),
+        },
+      ];
+    });
+  }, [historyData, timelineTime]);
+
   const { data: ukraineAlerts } = useQuery({
     ...trpc.alerts.ukraine.queryOptions(),
     enabled: ukraineAlertsEnabled,
@@ -143,11 +240,25 @@ export function MapScreen() {
   });
 
   const threats = useMemo(
-    () => (demo ? [...data.threats, ...demoThreats(demoNow)] : data.threats),
-    [demo, data.threats, demoNow],
+    () =>
+      historicalThreats !== null
+        ? historicalThreats
+        : demo
+          ? [...data.threats, ...demoThreats(demoNow)]
+          : data.threats,
+    [historicalThreats, demo, data.threats, demoNow],
   );
 
   const points = useMemo<LayerPoint[]>(() => {
+    if (historicalThreats !== null) {
+      return [
+        ...data.points.filter((point) => point.layer !== Layer.Drones),
+        ...historicalThreats.map((threat) => ({
+          ...threat,
+          layer: Layer.Drones as const,
+        })),
+      ];
+    }
     if (!demo || !enabledLayers[Layer.Drones]) {
       return data.points;
     }
@@ -158,7 +269,7 @@ export function MapScreen() {
         layer: Layer.Drones as const,
       })),
     ];
-  }, [demo, demoNow, data.points, enabledLayers]);
+  }, [historicalThreats, demo, demoNow, data.points, enabledLayers]);
 
   const keys = useMemo(() => pointKeys(points), [points]);
 
@@ -286,13 +397,44 @@ export function MapScreen() {
     <SituationCard
       regions={regionStates}
       threatCount={threats.length}
-      updatedAt={data.updatedAt[Layer.Drones]}
+      updatedAt={
+        historicalThreats === null ? data.updatedAt[Layer.Drones] : timelineTime
+      }
       demo={demo}
+      historical={historicalThreats !== null}
       onSelectRegion={openRegionAndZoom}
     />
   );
 
   const borderLegend = <BorderLegend />;
+
+  const timelineButton = <TimelineButton onClick={openTimeline} />;
+  const timeline = timelineOpen ? (
+    <Timeline
+      history={historyData}
+      isLoading={threatHistory.isFetching}
+      time={timelineTime}
+      hours={timelineHours}
+      speed={timelineSpeed}
+      playing={timelinePlaying}
+      activeCount={historicalThreats?.length ?? 0}
+      onTimeChange={(time) => {
+        setTimelineTime(time);
+      }}
+      onHoursChange={(hours) => {
+        setTimelineHours(hours);
+        setTimelinePick(null);
+      }}
+      onSpeedChange={setTimelineSpeed}
+      onTogglePlay={() => {
+        if (!timelinePlaying && timelineTime >= historyTo) {
+          setTimelineTime(historyFrom);
+        }
+        setTimelinePlaying(!timelinePlaying);
+      }}
+      onClose={closeTimeline}
+    />
+  ) : null;
 
   const layerList = (
     <div className="flex flex-col gap-1">
@@ -362,6 +504,7 @@ export function MapScreen() {
         sidePadding={isMobile || !panelOpen ? 0 : 392}
         searchMarker={searchMarker}
         history={history}
+        trails={trails}
         historyColor={historyColor}
         historyMarkers={selectedPoint?.layer === Layer.Drones}
         points={points}
@@ -369,7 +512,7 @@ export function MapScreen() {
         clusters={data.clusters}
         regions={regionCollection}
         regionStatuses={regionStatuses}
-        ukraineAlerts={visibleUkraineAlerts}
+        ukraineAlerts={timelineOpen ? null : visibleUkraineAlerts}
         onSelectUkraineAlert={(id) => setSelection({ kind: "ua-raion", id })}
         selectedKey={
           selectedPoint === null
@@ -413,19 +556,24 @@ export function MapScreen() {
             />
           </div>
           <MapControls className="absolute right-3 bottom-40 z-10" />
-          <button
-            type="button"
-            onClick={() => setLayersOpen(true)}
-            className="absolute inset-x-3 bottom-12 z-10 text-left shadow-2xl"
-          >
-            {situation}
-          </button>
+          {timeline === null ? (
+            <button
+              type="button"
+              onClick={() => setLayersOpen(true)}
+              className="absolute inset-x-3 bottom-12 z-10 text-left shadow-2xl"
+            >
+              {situation}
+            </button>
+          ) : (
+            <div className="absolute inset-x-3 bottom-12 z-10">{timeline}</div>
+          )}
 
           <Drawer open={layersOpen} onOpenChange={setLayersOpen}>
             <DrawerContent className="max-h-[85dvh]">
               <DrawerTitle className="sr-only">Warstwy</DrawerTitle>
               <div className="flex flex-col gap-3 overflow-y-auto p-4 *:shrink-0">
                 {situation}
+                {timelineButton}
                 {borderLegend}
                 {layerList}
                 <Button
@@ -494,6 +642,7 @@ export function MapScreen() {
               <div className="flex flex-col gap-4 px-4 pb-4">
                 <div className="flex flex-col gap-2">
                   {situation}
+                  {timelineButton}
                   {borderLegend}
                 </div>
                 <div>
@@ -531,13 +680,21 @@ export function MapScreen() {
             </aside>
           )}
 
-          <StatusStrip
-            className={`absolute right-3 bottom-12 z-10 transition-[left] duration-300 ${panelOpen ? "left-[404px]" : "left-3"}`}
-            isFetching={data.isFetching}
-            isLocating={isLocating}
-            failedLayers={data.failedLayers}
-            emptyLayers={data.emptyLayers}
-          />
+          {timeline === null ? (
+            <StatusStrip
+              className={`absolute right-3 bottom-12 z-10 transition-[left] duration-300 ${panelOpen ? "left-[404px]" : "left-3"}`}
+              isFetching={data.isFetching}
+              isLocating={isLocating}
+              failedLayers={data.failedLayers}
+              emptyLayers={data.emptyLayers}
+            />
+          ) : (
+            <div
+              className={`absolute right-16 bottom-10 z-10 flex justify-center transition-[left] duration-300 ${panelOpen ? "left-[404px]" : "left-3"}`}
+            >
+              <div className="w-full max-w-3xl">{timeline}</div>
+            </div>
+          )}
           <MapControls className="absolute right-3 bottom-10 z-10" />
         </>
       )}

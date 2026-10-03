@@ -32,6 +32,7 @@ export function motionModel(
     const { speedKmh, heading, stale, advisory, confirmedAt, type } =
       point.meta;
     if (
+      point.meta.historical === true ||
       stale ||
       advisory ||
       speedKmh === null ||

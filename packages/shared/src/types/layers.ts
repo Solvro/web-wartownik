@@ -53,6 +53,7 @@ export interface DroneMeta {
   predictedPath: Coordinates | null;
   confirmedAt: string | null;
   demo?: boolean;
+  historical?: boolean;
 }
 
 export interface AircraftMeta {

@@ -51,6 +51,8 @@ import {
   regionLine,
   selectionRing,
   smogHalo,
+  trailCasing,
+  trailLine,
   ukraineAlertFill,
   ukraineAlertLine,
   userDot,
@@ -76,9 +78,16 @@ const INTERACTIVE_LAYERS = [
 
 const PULSE_PERIOD_MS = 1600;
 
+export interface MapTrail {
+  coordinates: Coordinates[];
+  color: string;
+  active: boolean;
+}
+
 interface MapCanvasProps {
   sidePadding: number;
   history: Coordinates[];
+  trails: MapTrail[];
   historyColor?: string;
   historyMarkers: boolean;
   searchMarker: Coordinates | null;
@@ -105,6 +114,7 @@ function createMapHandle(map: MapLibreMap): MapHandle {
 export function MapCanvas({
   sidePadding,
   history,
+  trails,
   historyColor,
   historyMarkers,
   searchMarker,
@@ -175,6 +185,23 @@ export function MapCanvas({
             ],
     };
   }, [selectedKey, keys, points]);
+
+  const trailsFeature = useMemo<FeatureCollection>(
+    () => ({
+      type: "FeatureCollection",
+      features: trails
+        .filter((trail) => trail.coordinates.length > 1)
+        .map((trail) => ({
+          type: "Feature",
+          geometry: {
+            type: "LineString",
+            coordinates: trail.coordinates.map(({ lng, lat }) => [lng, lat]),
+          },
+          properties: { color: trail.color, active: trail.active },
+        })),
+    }),
+    [trails],
+  );
 
   const historyFeature = useMemo<FeatureCollection>(
     () => ({
@@ -567,6 +594,10 @@ export function MapCanvas({
         />
       </Source>
 
+      <Source id="trails" type="geojson" data={trailsFeature}>
+        <Layer id="trails-casing" {...trailCasing(dark)} />
+        <Layer id="trails-line" {...trailLine} />
+      </Source>
       <Source id="history" type="geojson" data={historyFeature} lineMetrics>
         <Layer id="history-casing" {...historyCasing(dark)} />
         <Layer
