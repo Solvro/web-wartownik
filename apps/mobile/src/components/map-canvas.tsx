@@ -214,6 +214,8 @@ const markerPaint: CircleLayerSpecification["paint"] = {
 
 const markerIcon: SymbolLayerSpecification["layout"] = {
   "icon-image": expr(["concat", "icon-", ["get", "icon"]]),
+  "icon-rotate": expr(["coalesce", ["get", "rotate"], 0]),
+  "icon-rotation-alignment": "map",
   "icon-size": 0.24,
   "icon-allow-overlap": true,
   "icon-ignore-placement": true,

@@ -1,5 +1,6 @@
 import { LAYER_CONFIG } from "@wartownik/shared/config/layers";
 import { destinationPoint } from "@wartownik/shared/geo/geo";
+import { planeHeadingIcon } from "@wartownik/shared/heading-icon";
 import { presentPoint } from "@wartownik/shared/presentation/index";
 import { Layer } from "@wartownik/shared/types/layers";
 import type {
@@ -33,6 +34,7 @@ export interface PointProperties {
   img: string;
   arrow?: string;
   heading?: number;
+  rotate?: number;
   color: string;
   pulse: boolean;
   dimmed: boolean;
@@ -125,15 +127,25 @@ export function buildMapFeatures(
       presentation.heading === null || presentation.heading === undefined
         ? undefined
         : presentation.heading;
+    const planeIcon =
+      point.layer === Layer.Aircraft && heading !== undefined
+        ? planeHeadingIcon(heading)
+        : undefined;
     const properties: PointProperties = {
       i: index,
       k: keys[index],
       layer: LAYER_CONFIG[point.layer].slug,
       w: 1,
-      img: markerImageId(presentation.icon, presentation.color),
+      img: markerImageId(
+        planeIcon?.variant ?? presentation.icon,
+        presentation.color,
+      ),
       arrow:
-        heading === undefined ? undefined : arrowImageId(presentation.color),
-      heading,
+        heading === undefined || planeIcon !== undefined
+          ? undefined
+          : arrowImageId(presentation.color),
+      heading: planeIcon === undefined ? heading : undefined,
+      rotate: planeIcon?.rotation,
       color: presentation.color,
       pulse: presentation.pulse === true,
       dimmed: presentation.dimmed === true,

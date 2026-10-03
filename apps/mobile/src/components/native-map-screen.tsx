@@ -21,6 +21,8 @@ import { notifyEscalations } from "@/lib/notifications";
 import { getSettings, useSettings } from "@/lib/settings";
 import { colors, radius } from "@/lib/theme";
 
+const POINT_PRESS_GUARD_MS = 400;
+
 type Selection =
   { kind: "point"; index: number } | { kind: "region"; id: string } | null;
 
@@ -63,7 +65,16 @@ export function NativeMapScreen() {
       ? data.regionStates.find((region) => region.id === selection.id)
       : undefined;
 
+  const selectionOpen = useRef(false);
+  const lastPointPress = useRef(0);
+
+  const closeDetails = () => {
+    detailsSheet.current?.close();
+    selectionOpen.current = false;
+  };
+
   const select = (next: Selection) => {
+    selectionOpen.current = next !== null;
     setSelection(next);
     layersSheet.current?.close();
     detailsSheet.current?.snapToIndex(0);
@@ -80,8 +91,20 @@ export function NativeMapScreen() {
         regionStates={data.regionStates}
         showUserLocation={location !== null}
         onViewportChange={setViewport}
-        onSelectPoint={(index) => select({ kind: "point", index })}
-        onSelectRegion={(id) => select({ kind: "region", id })}
+        onSelectPoint={(index) => {
+          lastPointPress.current = Date.now();
+          select({ kind: "point", index });
+        }}
+        onSelectRegion={(id) => {
+          if (Date.now() - lastPointPress.current < POINT_PRESS_GUARD_MS) {
+            return;
+          }
+          if (selectionOpen.current) {
+            closeDetails();
+            return;
+          }
+          select({ kind: "region", id });
+        }}
       />
 
       <SafeAreaView
@@ -138,7 +161,10 @@ export function NativeMapScreen() {
         index={-1}
         snapPoints={["45%", "85%"]}
         enablePanDownToClose
-        onClose={() => setSelection(null)}
+        onClose={() => {
+          selectionOpen.current = false;
+          setSelection(null);
+        }}
         backgroundStyle={styles.sheet}
         handleIndicatorStyle={styles.handle}
       >

@@ -1,5 +1,6 @@
 import { LAYER_VISUALS } from "@wartownik/shared/config/layer-visuals";
 import { LAYER_CONFIG } from "@wartownik/shared/config/layers";
+import { planeHeadingIcon } from "@wartownik/shared/heading-icon";
 import { presentPoint } from "@wartownik/shared/presentation/index";
 import type { RegionState } from "@wartownik/shared/regions";
 import { Layer } from "@wartownik/shared/types/layers";
@@ -16,6 +17,7 @@ const LIVE = new Set([Layer.Drones, Layer.Aircraft]);
 export interface PointFeatureProps {
   i: number;
   icon: string;
+  rotate?: number;
   color: string;
   layer: string;
   pulse: boolean;
@@ -38,12 +40,18 @@ export function buildPointCollections(
   const fires = empty();
   points.forEach((point, index) => {
     const presentation = presentPoint(point);
+    const heading = presentation.heading ?? undefined;
+    const planeIcon =
+      point.layer === Layer.Aircraft && heading !== undefined
+        ? planeHeadingIcon(heading)
+        : undefined;
     const feature = {
       type: "Feature" as const,
       geometry: { type: "Point" as const, coordinates: [point.lng, point.lat] },
       properties: {
         i: index,
-        icon: presentation.icon,
+        icon: planeIcon?.variant ?? presentation.icon,
+        rotate: planeIcon?.rotation,
         color: presentation.color,
         layer: LAYER_CONFIG[point.layer].slug,
         pulse: presentation.pulse === true,

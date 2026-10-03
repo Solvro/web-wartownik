@@ -35,16 +35,30 @@ const attributes = (attrs) =>
     .map(([key, value]) => `${key}="${value}"`)
     .join(" ");
 
-for (const [name, exportName] of Object.entries(ICONS)) {
+const VARIANTS = {
+  ...Object.fromEntries(
+    Object.entries(ICONS).map(([name, exportName]) => [
+      name,
+      { exportName, transform: "" },
+    ]),
+  ),
+  "plane-east": { exportName: "Plane", transform: "rotate(45 12 12)" },
+  "plane-west": {
+    exportName: "Plane",
+    transform: "translate(24 0) scale(-1 1) rotate(45 12 12)",
+  },
+};
+
+for (const [name, { exportName, transform }] of Object.entries(VARIANTS)) {
   const node = lucide[exportName];
   const children = node
     .map(([tag, attrs]) => `<${tag} ${attributes(attrs)}/>`)
     .join("");
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${SIZE}" height="${SIZE}" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round">${children}</svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${SIZE}" height="${SIZE}" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><g transform="${transform}">${children}</g></svg>`;
   await sharp(Buffer.from(svg))
     .png()
     .toFile(path.join(outputDir, `${name}.png`));
 }
 console.log(
-  `Generated ${Object.keys(ICONS).length} map icons in assets/map-icons`,
+  `Generated ${Object.keys(VARIANTS).length} map icons in assets/map-icons`,
 );

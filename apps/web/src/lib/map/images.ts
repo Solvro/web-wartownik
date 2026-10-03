@@ -86,7 +86,18 @@ function createCanvas(size: number) {
   return ctx;
 }
 
-function drawMarker(icon: IconName, color: string): ImageData {
+type IconOrientation = "default" | "east" | "west";
+
+const PLANE_VARIANTS: Record<string, IconOrientation> = {
+  "plane-east": "east",
+  "plane-west": "west",
+};
+
+function drawMarker(
+  icon: IconName,
+  color: string,
+  orientation: IconOrientation = "default",
+): ImageData {
   const ctx = createCanvas(MARKER_SIZE);
   const center = MARKER_SIZE / 2;
 
@@ -99,7 +110,14 @@ function drawMarker(icon: IconName, color: string): ImageData {
   ctx.stroke();
 
   ctx.save();
-  ctx.translate(center - ICON_SIZE / 2, center - ICON_SIZE / 2);
+  ctx.translate(center, center);
+  if (orientation === "west") {
+    ctx.scale(-1, 1);
+  }
+  if (orientation !== "default") {
+    ctx.rotate(Math.PI / 4);
+  }
+  ctx.translate(-ICON_SIZE / 2, -ICON_SIZE / 2);
   ctx.scale(ICON_SIZE / 24, ICON_SIZE / 24);
   ctx.lineWidth = 2.25;
   ctx.lineCap = "round";
@@ -129,7 +147,7 @@ function drawArrow(color: string): ImageData {
   return ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
 }
 
-export const markerImageId = (icon: IconName, color: string) =>
+export const markerImageId = (icon: string, color: string) =>
   `marker:${icon}:${color}`;
 export const arrowImageId = (color: string) => `arrow:${color}`;
 
@@ -138,7 +156,17 @@ export function addMissingImage(map: MapLibreMap, id: string) {
     return;
   }
   const [kind, first, second] = id.split(":");
+  const planeOrientation =
+    first === undefined ? undefined : PLANE_VARIANTS[first];
   if (
+    kind === "marker" &&
+    planeOrientation !== undefined &&
+    second !== undefined
+  ) {
+    map.addImage(id, drawMarker("plane", second, planeOrientation), {
+      pixelRatio: PIXEL_RATIO,
+    });
+  } else if (
     kind === "marker" &&
     first !== undefined &&
     second !== undefined &&

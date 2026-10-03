@@ -149,6 +149,8 @@ export const markerSymbol = (
   ...(filter === undefined ? {} : { filter }),
   layout: {
     "icon-image": ["get", "img"],
+    "icon-rotate": ["coalesce", ["get", "rotate"], 0],
+    "icon-rotation-alignment": "map",
     "icon-allow-overlap": true,
     "icon-ignore-placement": true,
     "symbol-sort-key": ["case", ["get", "pulse"], 2, 1],
