@@ -8,6 +8,7 @@ import { getAircraftDetails } from "../services/aircraft-details";
 import { searchPlaces } from "../services/geocode";
 import { getOfflinePack } from "../services/offline";
 import { getThreatTrack } from "../services/threat-track";
+import { getUkraineAlerts } from "../services/ukraine-alerts";
 import { publicProcedure, router, setCacheControl } from "../trpc";
 
 const gateway = (message: string, cause: unknown) => {
@@ -82,6 +83,18 @@ export const offlineRouter = router({
         throw gateway("Failed to build offline pack", error);
       }
     }),
+});
+
+export const alertsRouter = router({
+  ukraine: publicProcedure.query(async ({ ctx }) => {
+    try {
+      const alerts = await getUkraineAlerts();
+      setCacheControl(ctx, "public, max-age=30, stale-while-revalidate=60");
+      return alerts;
+    } catch (error) {
+      throw gateway("Failed to fetch Ukraine alerts", error);
+    }
+  }),
 });
 
 export const systemRouter = router({

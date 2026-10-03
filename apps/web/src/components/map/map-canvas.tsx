@@ -7,6 +7,7 @@ import type {
   LayerPoint,
 } from "@wartownik/shared/types/layers";
 import type { Coordinates } from "@wartownik/shared/types/map";
+import type { UkraineAlerts } from "@wartownik/shared/types/ukraine-alerts";
 import type { FeatureCollection, Point } from "geojson";
 import { MapPin } from "lucide-react";
 import type {
@@ -50,6 +51,8 @@ import {
   regionLine,
   selectionRing,
   smogHalo,
+  ukraineAlertFill,
+  ukraineAlertLine,
   userDot,
   userHalo,
   zoneFill,
@@ -67,6 +70,7 @@ const INTERACTIVE_LAYERS = [
   "fires-markers",
   "clustered-markers",
   "clusters",
+  "ukraine-raions-fill",
   "regions-fill",
 ];
 
@@ -84,6 +88,8 @@ interface MapCanvasProps {
   regions: RegionCollection | null;
   selectedKey: string | null;
   regionStatuses: Record<string, RegionStatus>;
+  ukraineAlerts: UkraineAlerts | null;
+  onSelectUkraineAlert(raionId: string): void;
   onSelectPoint(index: number): void;
   onSelectRegion(regionId: string): void;
 }
@@ -108,6 +114,8 @@ export function MapCanvas({
   regions,
   selectedKey,
   regionStatuses,
+  ukraineAlerts,
+  onSelectUkraineAlert,
   onSelectPoint,
   onSelectRegion,
 }: MapCanvasProps) {
@@ -131,6 +139,7 @@ export function MapCanvas({
   );
   const hoveredRegionRef = useRef<string | null>(null);
   const regionStatusesRef = useRef(regionStatuses);
+  const ukraineAlertsRef = useRef(ukraineAlerts);
   const [initialView] = useState(() => ({
     bounds: [
       [POLAND_BOUNDS.west, POLAND_BOUNDS.south],
@@ -297,12 +306,31 @@ export function MapCanvas({
 
   const handleClick = useCallback(
     async (event: MapLayerMouseEvent) => {
-      const feature = event.features?.[0];
+      const features = event.features ?? [];
+      const alertedRaions = new Set(
+        (ukraineAlertsRef.current?.raions ?? []).map((alert) => alert.raionId),
+      );
+      const feature =
+        features.find(
+          (item) =>
+            item.layer.id !== "regions-fill" &&
+            item.layer.id !== "ukraine-raions-fill",
+        ) ??
+        features.find(
+          (item) =>
+            item.layer.id === "ukraine-raions-fill" &&
+            alertedRaions.has(String((item.properties as { id: string }).id)),
+        ) ??
+        features.find((item) => item.layer.id === "regions-fill");
       const map = mapRef.current?.getMap();
       if (feature === undefined || map === undefined) {
         return;
       }
       const properties = feature.properties as Record<string, unknown>;
+      if (feature.layer.id === "ukraine-raions-fill") {
+        onSelectUkraineAlert(String(properties.id));
+        return;
+      }
       const [lng, lat] = (feature.geometry as Point).coordinates;
 
       if (feature.layer.id === "regions-fill") {
@@ -325,7 +353,7 @@ export function MapCanvas({
         onSelectPoint(properties.i);
       }
     },
-    [onSelectPoint, onSelectRegion],
+    [onSelectPoint, onSelectRegion, onSelectUkraineAlert],
   );
 
   const setHoveredRegion = useCallback((regionId: string | null) => {
@@ -366,21 +394,37 @@ export function MapCanvas({
   );
 
   const applyRegionStatuses = useCallback((map: MapLibreMap) => {
-    if (map.getSource("regions") === undefined) {
-      return;
+    const alerts = ukraineAlertsRef.current;
+    if (map.getSource("regions") !== undefined) {
+      const oblastAlerts = new Map(
+        (alerts?.oblasts ?? []).map((alert) => [alert.oblastId, alert.level]),
+      );
+      for (const [id, status] of Object.entries(regionStatusesRef.current)) {
+        map.setFeatureState(
+          { source: "regions", id },
+          { status, uaAlert: oblastAlerts.get(id) ?? null },
+        );
+      }
     }
-    for (const [id, status] of Object.entries(regionStatusesRef.current)) {
-      map.setFeatureState({ source: "regions", id }, { status });
+    if (map.getSource("ukraine-raions") !== undefined) {
+      map.removeFeatureState({ source: "ukraine-raions" });
+      for (const alert of alerts?.raions ?? []) {
+        map.setFeatureState(
+          { source: "ukraine-raions", id: alert.raionId },
+          { alert: alert.level },
+        );
+      }
     }
   }, []);
 
   useEffect(() => {
     regionStatusesRef.current = regionStatuses;
+    ukraineAlertsRef.current = ukraineAlerts;
     const map = mapRef.current?.getMap();
     if (map !== undefined) {
       applyRegionStatuses(map);
     }
-  }, [regionStatuses, applyRegionStatuses, mapReady]);
+  }, [regionStatuses, ukraineAlerts, applyRegionStatuses, mapReady]);
 
   useEffect(() => {
     const map = mapRef.current?.getMap();
@@ -391,7 +435,10 @@ export function MapCanvas({
       sourceId?: string;
       isSourceLoaded?: boolean;
     }) => {
-      if (event.sourceId === "regions" && event.isSourceLoaded === true) {
+      if (
+        (event.sourceId === "regions" || event.sourceId === "ukraine-raions") &&
+        event.isSourceLoaded === true
+      ) {
         applyRegionStatuses(map);
       }
     };
@@ -446,8 +493,30 @@ export function MapCanvas({
             beforeId={labelLayerId}
             {...regionHoverFill}
           />
+          <Layer
+            id="regions-ua-alert"
+            beforeId={labelLayerId}
+            {...ukraineAlertFill("uaAlert")}
+          />
         </Source>
       )}
+      <Source
+        id="ukraine-raions"
+        type="geojson"
+        data={GEO_URLS.ukraineRaions}
+        promoteId="id"
+      >
+        <Layer
+          id="ukraine-raions-fill"
+          beforeId={labelLayerId}
+          {...ukraineAlertFill("alert")}
+        />
+        <Layer
+          id="ukraine-raions-line"
+          beforeId={labelLayerId}
+          {...ukraineAlertLine}
+        />
+      </Source>
       <Source id="region-labels" type="geojson" data={GEO_URLS.regionLabels}>
         <Layer id="regions-label" {...regionLabel(dark)} />
       </Source>

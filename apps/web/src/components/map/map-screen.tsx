@@ -31,6 +31,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useStoredFlag } from "@/hooks/use-stored-flag";
 import { useThreatTrack } from "@/hooks/use-threat-track";
 import { pointKeys } from "@/lib/map/features";
+import { useTRPC } from "@/lib/trpc";
 
 import { AlertBar } from "./alert-bar";
 import { BorderLegend } from "./border-legend";
@@ -41,6 +42,7 @@ import { RegionContent } from "./region-panel";
 import { SearchBox } from "./search-box";
 import { SituationCard, sortedAlerts } from "./situation-card";
 import { StatusStrip } from "./status-strip";
+import { UkraineAlertContent, UkraineAlertsToggle } from "./ukraine-alerts";
 
 const MapCanvas = dynamic(
   () => import("./map-canvas").then((module) => module.MapCanvas),
@@ -61,7 +63,14 @@ const DEMO_TICK_MS = 2000;
 type Selection =
   | { kind: "point"; key: string; point: LayerPoint }
   | { kind: "region"; id: string }
+  | { kind: "ua-raion"; id: string }
   | null;
+
+interface RaionInfo {
+  id: string;
+  name: string;
+  oblastId: string;
+}
 
 function useDemoNow(enabled: boolean) {
   const [now, setNow] = useState(() => Date.now());
@@ -89,7 +98,42 @@ export function MapScreen() {
   const [searchMarker, setSearchMarker] = useState<Coordinates | null>(null);
   const [panelOpen, setPanelOpen] = useStoredFlag("wartownik-panel-open", true);
 
+  const [ukraineAlertsEnabled, setUkraineAlertsEnabled] = useStoredFlag(
+    "wartownik-ua-alerts",
+    true,
+  );
+  const trpc = useTRPC();
+
   const data = useLayerData(enabledLayers, viewport);
+
+  const { data: ukraineAlerts } = useQuery({
+    ...trpc.alerts.ukraine.queryOptions(),
+    enabled: ukraineAlertsEnabled,
+    refetchInterval: 30_000,
+    staleTime: 20_000,
+  });
+  const visibleUkraineAlerts = ukraineAlertsEnabled
+    ? (ukraineAlerts ?? null)
+    : null;
+
+  const { data: raionInfo } = useQuery({
+    queryKey: ["ukraine-raions", GEO_URLS.ukraineRaions],
+    queryFn: async () => {
+      const collection = (await (
+        await fetch(GEO_URLS.ukraineRaions)
+      ).json()) as {
+        features: { properties: RaionInfo }[];
+      };
+      return new Map(
+        collection.features.map(({ properties }) => [
+          properties.id,
+          properties,
+        ]),
+      );
+    },
+    enabled: ukraineAlertsEnabled,
+    staleTime: Infinity,
+  });
 
   const { data: regionCollection = null } = useQuery({
     queryKey: ["regions-geometry", GEO_URLS.regions],
@@ -251,16 +295,56 @@ export function MapScreen() {
   const borderLegend = <BorderLegend />;
 
   const layerList = (
-    <LayerList
-      counts={data.counts}
-      loadingLayers={loadingLayers}
-      failedLayers={data.failedLayers}
-    />
+    <div className="flex flex-col gap-1">
+      <LayerList
+        counts={data.counts}
+        loadingLayers={loadingLayers}
+        failedLayers={data.failedLayers}
+      />
+      <UkraineAlertsToggle
+        enabled={ukraineAlertsEnabled}
+        count={
+          ukraineAlerts === undefined
+            ? undefined
+            : ukraineAlerts.oblasts.length + ukraineAlerts.raions.length
+        }
+        onChange={setUkraineAlertsEnabled}
+      />
+    </div>
   );
+
+  const regionLabel = (regionId: string) =>
+    regionCollection?.features.find(
+      (feature) => feature.properties.id === regionId,
+    )?.properties.label ?? regionId;
+  const selectedRaionAlert =
+    selection?.kind === "ua-raion"
+      ? visibleUkraineAlerts?.raions.find(
+          (alert) => alert.raionId === selection.id,
+        )
+      : undefined;
+  const selectedOblastAlert =
+    selection?.kind === "region"
+      ? visibleUkraineAlerts?.oblasts.find(
+          (alert) => alert.oblastId === selection.id,
+        )
+      : undefined;
 
   const closeSelection = () => setSelection(null);
   const selectionContent =
-    selectedPoint !== null ? (
+    selectedRaionAlert !== undefined ? (
+      <UkraineAlertContent
+        title={`rejon ${raionInfo?.get(selectedRaionAlert.raionId)?.name ?? ""} · ${regionLabel(selectedRaionAlert.oblastId)}`}
+        alert={selectedRaionAlert}
+        onClose={closeSelection}
+      />
+    ) : selectedOblastAlert !== undefined ? (
+      <UkraineAlertContent
+        title={regionLabel(selectedOblastAlert.oblastId)}
+        alert={selectedOblastAlert}
+        onClose={closeSelection}
+      />
+    ) : selectedPoint !== null ? (
       <DetailsContent point={selectedPoint} onClose={closeSelection} />
     ) : selectedRegion !== undefined ? (
       <RegionContent
@@ -285,6 +369,8 @@ export function MapScreen() {
         clusters={data.clusters}
         regions={regionCollection}
         regionStatuses={regionStatuses}
+        ukraineAlerts={visibleUkraineAlerts}
+        onSelectUkraineAlert={(id) => setSelection({ kind: "ua-raion", id })}
         selectedKey={
           selectedPoint === null
             ? null

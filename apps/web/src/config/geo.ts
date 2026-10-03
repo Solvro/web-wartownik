@@ -6,4 +6,5 @@ export const GEO_URLS = {
   regions: geoUrl("regions.json"),
   regionLabels: geoUrl("region-labels.json"),
   countries: geoUrl("countries.json"),
+  ukraineRaions: geoUrl("ukraine-raions.json"),
 } as const;

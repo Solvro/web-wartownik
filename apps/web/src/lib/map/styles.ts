@@ -492,3 +492,44 @@ export const historyPoints = (
     "circle-stroke-color": "#ffffff",
   },
 });
+
+const alertColor = (key: string): ExpressionSpecification => [
+  "match",
+  ["coalesce", ["feature-state", key], "none"],
+  "red",
+  "#dc2626",
+  "yellow",
+  "#eab308",
+  "rgba(0,0,0,0)",
+];
+
+export function ukraineAlertFill(
+  key: string,
+): Omit<FillLayerSpecification, "id" | "source"> {
+  return {
+    type: "fill",
+    paint: {
+      "fill-color": alertColor(key),
+      "fill-opacity": [
+        "case",
+        ["==", ["coalesce", ["feature-state", key], "none"], "none"],
+        0,
+        0.3,
+      ],
+    },
+  };
+}
+
+export const ukraineAlertLine: Omit<LineLayerSpecification, "id" | "source"> = {
+  type: "line",
+  paint: {
+    "line-color": alertColor("alert"),
+    "line-width": 1.2,
+    "line-opacity": [
+      "case",
+      ["==", ["coalesce", ["feature-state", "alert"], "none"], "none"],
+      0,
+      0.85,
+    ],
+  },
+};
