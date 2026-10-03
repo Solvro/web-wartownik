@@ -265,6 +265,20 @@ const regionColor = [
   REGION_STATUS_VISUALS.none.color,
 ] as unknown as ExpressionSpecification;
 
+function regionOpacity(dark: boolean, scale: number): ExpressionSpecification {
+  return [
+    "match",
+    ["get", "status"],
+    "threat",
+    0.32 * scale,
+    "approaching",
+    0.24 * scale,
+    "watch",
+    0.15 * scale,
+    (dark ? 0.05 : 0.04) * scale,
+  ];
+}
+
 export function regionFill(
   dark: boolean,
 ): Omit<FillLayerSpecification, "id" | "source"> {
@@ -273,15 +287,15 @@ export function regionFill(
     paint: {
       "fill-color": regionColor,
       "fill-opacity": [
-        "match",
-        ["get", "status"],
-        "threat",
-        0.32,
-        "approaching",
-        0.24,
-        "watch",
-        0.15,
-        dark ? 0.05 : 0.04,
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        5,
+        regionOpacity(dark, 1),
+        9,
+        regionOpacity(dark, 0.45),
+        12,
+        regionOpacity(dark, 0.15),
       ],
     },
   };

@@ -65,8 +65,17 @@ export async function GET(request: NextRequest) {
       headers: { "User-Agent": "defensownik.solvro.pl" },
       next: { revalidate: 86400 },
     });
+    const seen = new Set<string>();
+    const results = features.map(toResult).filter((result) => {
+      const key = `${result.label}|${result.context}`;
+      if (seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    });
     return Response.json(
-      { results: features.map(toResult) },
+      { results },
       { headers: { "Cache-Control": "public, max-age=86400" } },
     );
   } catch (error) {
