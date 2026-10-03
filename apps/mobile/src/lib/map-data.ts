@@ -15,6 +15,7 @@ const LIVE = new Set([Layer.Drones, Layer.Aircraft]);
 
 export interface PointFeatureProps {
   i: number;
+  icon: string;
   color: string;
   layer: string;
   pulse: boolean;
@@ -41,6 +42,7 @@ export function buildPointCollections(
       geometry: { type: "Point" as const, coordinates: [point.lng, point.lat] },
       properties: {
         i: index,
+        icon: presentation.icon,
         color: presentation.color,
         layer: LAYER_CONFIG[point.layer].slug,
         pulse: presentation.pulse === true,
@@ -56,6 +58,7 @@ export function buildPointCollections(
       geometry: { type: "Point", coordinates: [cluster.lng, cluster.lat] },
       properties: {
         i: -1,
+        icon: LAYER_VISUALS[cluster.layer].icon,
         color: LAYER_VISUALS[cluster.layer].color,
         layer: LAYER_CONFIG[cluster.layer].slug,
         pulse: false,

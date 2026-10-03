@@ -2,6 +2,7 @@ import type { ExpressionSpecification } from "@maplibre/maplibre-gl-style-spec";
 import {
   Camera,
   GeoJSONSource,
+  Images,
   Layer,
   Map as MapLibreMap,
   UserLocation,
@@ -35,7 +36,15 @@ import {
   regionsWithStatus,
 } from "@/lib/map-data";
 import type { PointFeatureProps } from "@/lib/map-data";
+import { MAP_ICON_IMAGES } from "@/lib/map-icons";
 import { colors } from "@/lib/theme";
+
+const MAP_ICON_SOURCES = Object.fromEntries(
+  Object.entries(MAP_ICON_IMAGES).map(([name, source]) => [
+    `icon-${name}`,
+    source,
+  ]),
+);
 
 export interface MapCanvasHandle {
   flyTo(center: Coordinates, zoom?: number): void;
@@ -193,16 +202,27 @@ const clusterCount: SymbolLayerSpecification["layout"] = {
 
 const markerPaint: CircleLayerSpecification["paint"] = {
   "circle-color": expr(["get", "color"]),
-  "circle-radius": 9,
+  "circle-radius": 13,
   "circle-stroke-width": 2,
   "circle-stroke-color": "#ffffff",
   "circle-opacity": expr(["case", ["get", "dimmed"], 0.55, 1]),
   "circle-stroke-opacity": expr(["case", ["get", "dimmed"], 0.55, 1]),
 };
 
+const markerIcon: SymbolLayerSpecification["layout"] = {
+  "icon-image": expr(["concat", "icon-", ["get", "icon"]]),
+  "icon-size": 0.24,
+  "icon-allow-overlap": true,
+  "icon-ignore-placement": true,
+};
+
+const markerIconPaint: SymbolLayerSpecification["paint"] = {
+  "icon-opacity": expr(["case", ["get", "dimmed"], 0.55, 1]),
+};
+
 const haloPaint: CircleLayerSpecification["paint"] = {
   "circle-color": expr(["get", "color"]),
-  "circle-radius": 18,
+  "circle-radius": 22,
   "circle-opacity": 0.25,
 };
 
@@ -296,6 +316,7 @@ export const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(
           });
         }}
       >
+        <Images images={MAP_ICON_SOURCES} />
         <Camera
           ref={camera}
           initialViewState={{
@@ -365,6 +386,13 @@ export const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(
             filter={expr(["!", isCluster])}
             paint={markerPaint}
           />
+          <Layer
+            type="symbol"
+            id="clustered-icons"
+            filter={expr(["!", isCluster])}
+            layout={markerIcon}
+            paint={markerIconPaint}
+          />
         </GeoJSONSource>
 
         <GeoJSONSource
@@ -381,6 +409,12 @@ export const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(
             paint={haloPaint}
           />
           <Layer type="circle" id="live-markers" paint={markerPaint} />
+          <Layer
+            type="symbol"
+            id="live-icons"
+            layout={markerIcon}
+            paint={markerIconPaint}
+          />
         </GeoJSONSource>
 
         {showUserLocation ? <UserLocation heading /> : null}
