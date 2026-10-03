@@ -1,4 +1,3 @@
-import { SHELTER_AVAILABILITY_VISUALS } from "@wartownik/shared/config/presentation";
 import { formatDistance } from "@wartownik/shared/presentation/format";
 import {
   REGION_STATUS_VISUALS,
@@ -13,8 +12,10 @@ import { ConnectivityBanner } from "@/components/connectivity-banner";
 import { openDirections } from "@/components/point-details";
 import { RegionDetails } from "@/components/region-details";
 import { ShelterCompass } from "@/components/shelter-compass";
+import { ShelterRanking } from "@/components/shelter-ranking";
 import { useConnectivity } from "@/hooks/use-connectivity";
 import { useLiveData } from "@/hooks/use-live-data";
+import { useNearbyShelters } from "@/hooks/use-nearby-shelters";
 import { useUserLocation } from "@/hooks/use-user-location";
 import { nearest, useOfflinePack } from "@/lib/offline-pack";
 import { regionAt } from "@/lib/regions";
@@ -34,13 +35,10 @@ export default function RegionScreen() {
   const visual =
     region === undefined ? null : REGION_STATUS_VISUALS[region.status];
 
-  const shelters =
-    location !== null && pack !== null
-      ? nearest(location, pack.shelters, 3)
-      : [];
+  const { shelters: rankedShelters } = useNearbyShelters(location);
   const aeds =
     location !== null && pack !== null ? nearest(location, pack.aeds, 3) : [];
-  const closestShelter = shelters[0];
+  const closestShelter = rankedShelters[0]?.shelter;
 
   return (
     <SafeAreaView edges={["top"]} style={styles.screen}>
@@ -96,8 +94,16 @@ export default function RegionScreen() {
           />
         ) : null}
 
-        <Text style={styles.section}>Najbliższe schrony</Text>
-        {pack === null ? (
+        <Text style={styles.section}>Najlepsze schrony w pobliżu</Text>
+        {location === null ? (
+          <View style={styles.card}>
+            <Text style={styles.muted}>
+              Włącz lokalizację, aby wyznaczyć najbliższe punkty.
+            </Text>
+          </View>
+        ) : rankedShelters.length > 0 ? (
+          <ShelterRanking shelters={rankedShelters} />
+        ) : (
           <Pressable
             style={styles.card}
             onPress={() => router.push("/settings")}
@@ -107,45 +113,6 @@ export default function RegionScreen() {
             </Text>
             <Text style={styles.link}>Przejdź do ustawień offline →</Text>
           </Pressable>
-        ) : location === null ? (
-          <View style={styles.card}>
-            <Text style={styles.muted}>
-              Włącz lokalizację, aby wyznaczyć najbliższe punkty.
-            </Text>
-          </View>
-        ) : (
-          shelters.map((shelter) => (
-            <View key={shelter.meta.id} style={styles.item}>
-              <View
-                style={[
-                  styles.dot,
-                  {
-                    backgroundColor:
-                      SHELTER_AVAILABILITY_VISUALS[shelter.meta.availability]
-                        .color,
-                  },
-                ]}
-              />
-              <View style={{ flex: 1 }}>
-                <Text style={styles.text} numberOfLines={2}>
-                  {shelter.meta.address ?? "Punkt schronienia"}
-                </Text>
-                <Text style={styles.muted}>
-                  {formatDistance(shelter.distance)} ·{" "}
-                  {
-                    SHELTER_AVAILABILITY_VISUALS[shelter.meta.availability]
-                      .label
-                  }
-                </Text>
-              </View>
-              <Pressable
-                style={styles.navButton}
-                onPress={() => openDirections(shelter)}
-              >
-                <Navigation size={18} color="#fff" />
-              </Pressable>
-            </View>
-          ))
         )}
 
         {pack !== null && location !== null ? (
