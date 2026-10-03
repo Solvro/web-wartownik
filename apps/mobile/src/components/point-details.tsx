@@ -11,6 +11,7 @@ import { colors, radius } from "@/lib/theme";
 
 import { Icon } from "./icon";
 import { StatusPill } from "./status-pill";
+import { TrackExtras } from "./track-extras";
 
 function Value({ value }: { value: DetailValue }) {
   if (value === null) {
@@ -70,6 +71,8 @@ export function PointDetails({
           </View>
         </View>
       </View>
+
+      <TrackExtras point={point} />
 
       {details.length > 0 ? (
         <View style={styles.table}>

@@ -15,6 +15,7 @@ import { RegionDetails } from "@/components/region-details";
 import { useConnectivity } from "@/hooks/use-connectivity";
 import { useLiveData } from "@/hooks/use-live-data";
 import type { MapViewport } from "@/hooks/use-live-data";
+import { useSelectedTrack } from "@/hooks/use-selected-track";
 import { useUserLocation } from "@/hooks/use-user-location";
 import { notifyEscalations } from "@/lib/notifications";
 import { getSettings, useSettings } from "@/lib/settings";
@@ -56,6 +57,7 @@ export function NativeMapScreen() {
 
   const selectedPoint =
     selection?.kind === "point" ? data.points[selection.index] : undefined;
+  const track = useSelectedTrack(selectedPoint);
   const selectedRegion =
     selection?.kind === "region"
       ? data.regionStates.find((region) => region.id === selection.id)
@@ -71,6 +73,8 @@ export function NativeMapScreen() {
     <View style={styles.screen}>
       <MapCanvas
         ref={map}
+        history={track.history}
+        historyColor={track.color}
         points={data.points}
         clusters={data.clusters}
         regionStates={data.regionStates}

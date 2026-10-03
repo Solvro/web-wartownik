@@ -12,6 +12,7 @@ import type {
   CircleLayerSpecification,
   FillLayerSpecification,
   GeoJSONSourceRef,
+  HeatmapLayerSpecification,
   LineLayerSpecification,
   StyleSpecification,
   SymbolLayerSpecification,
@@ -24,7 +25,7 @@ import type {
   LayerPoint,
 } from "@wartownik/shared/types/layers";
 import type { Coordinates } from "@wartownik/shared/types/map";
-import type { Feature, Point } from "geojson";
+import type { Feature, FeatureCollection, LineString, Point } from "geojson";
 import { forwardRef, useImperativeHandle, useMemo, useRef } from "react";
 import { StyleSheet } from "react-native";
 
@@ -52,6 +53,8 @@ export interface MapCanvasHandle {
 }
 
 interface MapCanvasProps {
+  history: Coordinates[];
+  historyColor: string;
   points: LayerPoint[];
   clusters: LayerClusterWithLayer[];
   regionStates: RegionState[];
@@ -220,6 +223,40 @@ const markerIconPaint: SymbolLayerSpecification["paint"] = {
   "icon-opacity": expr(["case", ["get", "dimmed"], 0.55, 1]),
 };
 
+const firesHeatmap: HeatmapLayerSpecification["paint"] = {
+  "heatmap-weight": expr(["/", ["get", "w"], 3]),
+  "heatmap-intensity": expr([
+    "interpolate",
+    ["linear"],
+    ["zoom"],
+    4,
+    0.8,
+    9,
+    2,
+  ]),
+  "heatmap-radius": expr(["interpolate", ["linear"], ["zoom"], 4, 10, 9, 22]),
+  "heatmap-opacity": expr(["interpolate", ["linear"], ["zoom"], 7, 0.85, 9, 0]),
+  "heatmap-color": expr([
+    "interpolate",
+    ["linear"],
+    ["heatmap-density"],
+    0,
+    "rgba(245,158,11,0)",
+    0.2,
+    "rgba(245,158,11,0.55)",
+    0.5,
+    "#ea580c",
+    1,
+    "#b91c1c",
+  ]),
+};
+
+const historyPaint = (color: string): LineLayerSpecification["paint"] => ({
+  "line-color": color,
+  "line-width": 3,
+  "line-opacity": 0.85,
+});
+
 const haloPaint: CircleLayerSpecification["paint"] = {
   "circle-color": expr(["get", "color"]),
   "circle-radius": 22,
@@ -229,6 +266,8 @@ const haloPaint: CircleLayerSpecification["paint"] = {
 export const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(
   function MapCanvas(
     {
+      history,
+      historyColor,
       points,
       clusters,
       regionStates,
@@ -265,7 +304,27 @@ export const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(
       () => regionsWithStatus(regionStates),
       [regionStates],
     );
-    const { clustered, live } = useMemo(
+    const historyLine = useMemo<FeatureCollection<LineString>>(
+      () => ({
+        type: "FeatureCollection",
+        features:
+          history.length < 2
+            ? []
+            : [
+                {
+                  type: "Feature",
+                  geometry: {
+                    type: "LineString",
+                    coordinates: history.map(({ lng, lat }) => [lng, lat]),
+                  },
+                  properties: {},
+                },
+              ],
+      }),
+      [history],
+    );
+
+    const { clustered, live, fires } = useMemo(
       () => buildPointCollections(points, clusters),
       [points, clusters],
     );
@@ -392,6 +451,42 @@ export const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(
             filter={expr(["!", isCluster])}
             layout={markerIcon}
             paint={markerIconPaint}
+          />
+        </GeoJSONSource>
+
+        <GeoJSONSource
+          id="fires"
+          data={fires}
+          onPress={({ nativeEvent }) =>
+            void handlePointPress(nativeEvent.features[0])
+          }
+        >
+          <Layer
+            type="heatmap"
+            id="fires-heat"
+            maxzoom={9}
+            paint={firesHeatmap}
+          />
+          <Layer
+            type="circle"
+            id="fires-markers"
+            minzoom={7.5}
+            paint={markerPaint}
+          />
+          <Layer
+            type="symbol"
+            id="fires-icons"
+            minzoom={7.5}
+            layout={markerIcon}
+            paint={markerIconPaint}
+          />
+        </GeoJSONSource>
+
+        <GeoJSONSource id="history" data={historyLine}>
+          <Layer
+            type="line"
+            id="history-line"
+            paint={historyPaint(historyColor)}
           />
         </GeoJSONSource>
 

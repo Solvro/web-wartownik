@@ -35,6 +35,7 @@ export function buildPointCollections(
 ) {
   const clustered = empty();
   const live = empty();
+  const fires = empty();
   points.forEach((point, index) => {
     const presentation = presentPoint(point);
     const feature = {
@@ -50,7 +51,20 @@ export function buildPointCollections(
         w: 1,
       },
     };
-    (LIVE.has(point.layer) ? live : clustered).features.push(feature);
+    const target =
+      point.layer === Layer.Fires
+        ? fires
+        : LIVE.has(point.layer)
+          ? live
+          : clustered;
+    target.features.push(
+      point.layer === Layer.Fires
+        ? {
+            ...feature,
+            properties: { ...feature.properties, w: point.meta.intensity },
+          }
+        : feature,
+    );
   });
   for (const cluster of clusters) {
     clustered.features.push({
@@ -69,7 +83,7 @@ export function buildPointCollections(
       },
     });
   }
-  return { clustered, live };
+  return { clustered, live, fires };
 }
 
 export function regionsWithStatus(states: RegionState[]) {
