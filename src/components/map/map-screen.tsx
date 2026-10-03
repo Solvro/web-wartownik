@@ -12,6 +12,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useAircraftDetails } from "@/hooks/use-aircraft-details";
 import { useLayerData } from "@/hooks/use-layer-data";
 import { useMap } from "@/hooks/use-map";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -153,6 +154,19 @@ export function MapScreen() {
       ? regionStates.find((region) => region.id === selection.id)
       : undefined;
 
+  const selectedAircraftHex =
+    selectedPoint?.layer === Layer.Aircraft ? selectedPoint.meta.id : null;
+  const { data: aircraftDetails } = useAircraftDetails(selectedAircraftHex);
+  const history = useMemo(() => {
+    if (
+      selectedPoint?.layer !== Layer.Aircraft ||
+      aircraftDetails === undefined
+    ) {
+      return [];
+    }
+    return [...aircraftDetails.track, selectedPoint];
+  }, [selectedPoint, aircraftDetails]);
+
   const selectPoint = useCallback(
     (index: number) => {
       const point = points[index];
@@ -254,6 +268,7 @@ export function MapScreen() {
       <MapCanvas
         sidePadding={isMobile || !panelOpen ? 0 : 392}
         searchMarker={searchMarker}
+        history={history}
         points={points}
         keys={keys}
         clusters={data.clusters}

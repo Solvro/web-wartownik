@@ -2,7 +2,7 @@
 
 Mapa bezpieczeństwa dla Polski: schrony, drony i rakiety, samoloty wojskowe, jakość powietrza,
 pożary, stany ostrzegawcze rzek, defibrylatory (AED) i zgłoszenia mieszkańców w jednym miejscu.
-Dla każdego z 16 województw liczony jest status zagrożenia powietrznego (w regionie / zbliża się
+Na mapie są granice 16 województw oraz obwodów Ukrainy i Białorusi. Dla każdego regionu liczony jest status zagrożenia powietrznego (w regionie / zbliża się
 z ETA / w pobliżu) na podstawie pozycji, kursu, prędkości i niepewności położenia obiektów.
 
 Tryb symulacji (`/map?symulacja`) dokłada skryptowany scenariusz: grupa dronów leci znad obwodu
@@ -11,7 +11,8 @@ wołyńskiego nad województwo lubelskie, a wszystkie elementy są oznaczone jak
 Stack: Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, shadcn/ui, TanStack Query,
 Drizzle ORM, PostgreSQL 17 + PostGIS 3.5, MapLibre GL (`react-map-gl`) z kafelkami
 [OpenFreeMap](https://openfreemap.org), geokodowanie [Photon](https://photon.komoot.io),
-granice województw z [polska-geojson](https://github.com/ppatrzyk/polska-geojson) i Turf.
+granice województw z [polska-geojson](https://github.com/ppatrzyk/polska-geojson), obwodów Ukrainy
+i Białorusi z [geoBoundaries](https://www.geoboundaries.org) (ODbL) i Turf.
 
 ## Źródła danych
 

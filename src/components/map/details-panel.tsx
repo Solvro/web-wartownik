@@ -8,7 +8,10 @@ import { useMap } from "@/hooks/use-map";
 import { haversineDistance } from "@/lib/helpers/geo";
 import { presentPoint } from "@/lib/presentation";
 import { formatDistance } from "@/lib/presentation/format";
+import { Layer } from "@/types/layers";
 import type { LayerPoint } from "@/types/layers";
+
+import { AircraftExtras } from "./aircraft-extras";
 
 export function DetailsContent({
   point,
@@ -80,6 +83,10 @@ export function DetailsContent({
           </Button>
         )}
       </div>
+
+      {point.layer === Layer.Aircraft ? (
+        <AircraftExtras hex={point.meta.id} />
+      ) : null}
 
       {details.length > 0 ? (
         <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 rounded-xl border bg-muted/40 px-3.5 py-3 text-sm">

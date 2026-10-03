@@ -35,6 +35,8 @@ import {
   clusterCount,
   clusterGlow,
   firesHeatmap,
+  historyCasing,
+  historyLine,
   markerSymbol,
   polandGlow,
   polandOutline,
@@ -70,6 +72,7 @@ const PULSE_PERIOD_MS = 1600;
 
 interface MapCanvasProps {
   sidePadding: number;
+  history: Coordinates[];
   searchMarker: Coordinates | null;
   points: LayerPoint[];
   keys: string[];
@@ -96,6 +99,7 @@ function firstSymbolLayerId(map: MapLibreMap): string | undefined {
 
 export function MapCanvas({
   sidePadding,
+  history,
   searchMarker,
   points,
   keys,
@@ -149,6 +153,26 @@ export function MapCanvas({
             ],
     };
   }, [selectedKey, keys, points]);
+
+  const historyFeature = useMemo<FeatureCollection>(
+    () => ({
+      type: "FeatureCollection",
+      features:
+        history.length < 2
+          ? []
+          : [
+              {
+                type: "Feature",
+                geometry: {
+                  type: "LineString",
+                  coordinates: history.map(({ lng, lat }) => [lng, lat]),
+                },
+                properties: {},
+              },
+            ],
+    }),
+    [history],
+  );
 
   const userFeature = useMemo<FeatureCollection<Point>>(
     () => ({
@@ -406,6 +430,11 @@ export function MapCanvas({
             ["!=", ["get", "kind"], "server"],
           ])}
         />
+      </Source>
+
+      <Source id="history" type="geojson" data={historyFeature} lineMetrics>
+        <Layer id="history-casing" {...historyCasing(dark)} />
+        <Layer id="history-line" {...historyLine} />
       </Source>
 
       <Source id="selection" type="geojson" data={selection}>

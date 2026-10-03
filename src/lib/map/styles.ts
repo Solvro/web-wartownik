@@ -398,3 +398,36 @@ export const userDot: Omit<CircleLayerSpecification, "id" | "source"> = {
     "circle-stroke-color": "#ffffff",
   },
 };
+
+const HISTORY_COLOR = "#22d3ee";
+
+export function historyCasing(
+  dark: boolean,
+): Omit<LineLayerSpecification, "id" | "source"> {
+  return {
+    type: "line",
+    layout: { "line-cap": "round", "line-join": "round" },
+    paint: {
+      "line-color": dark ? "#020617" : "#ffffff",
+      "line-width": 5,
+      "line-opacity": 0.6,
+    },
+  };
+}
+
+export const historyLine: Omit<LineLayerSpecification, "id" | "source"> = {
+  type: "line",
+  layout: { "line-cap": "round", "line-join": "round" },
+  paint: {
+    "line-width": 2.5,
+    "line-gradient": [
+      "interpolate",
+      ["linear"],
+      ["line-progress"],
+      0,
+      "rgba(34,211,238,0.15)",
+      1,
+      HISTORY_COLOR,
+    ],
+  },
+};
