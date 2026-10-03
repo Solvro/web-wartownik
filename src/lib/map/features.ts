@@ -45,15 +45,18 @@ export type ServerClusterProperties = {
 
 type PointCollection<P> = FeatureCollection<Point, P>;
 
+export interface ZoneProperties {
+  i: number;
+  color: string;
+  dimmed: boolean;
+}
+
 export interface MapFeatures {
   clustered: PointCollection<PointProperties | ServerClusterProperties>;
   live: PointCollection<PointProperties>;
   fires: PointCollection<PointProperties & { intensity: number }>;
   halos: PointCollection<{ color: string }>;
-  zones: FeatureCollection<
-    Polygon | LineString,
-    { color: string; dimmed: boolean }
-  >;
+  zones: FeatureCollection<Polygon | LineString, ZoneProperties>;
 }
 
 const CIRCLE_SEGMENTS = 64;
@@ -151,7 +154,11 @@ export function buildMapFeatures(
         result.zones.features.push({
           type: "Feature",
           geometry: circle(point, point.meta.uncertaintyKm),
-          properties: { color: presentation.color, dimmed: properties.dimmed },
+          properties: {
+            i: index,
+            color: presentation.color,
+            dimmed: properties.dimmed,
+          },
         });
       }
       if (meta.predictedPath !== null) {
@@ -164,7 +171,11 @@ export function buildMapFeatures(
               [meta.predictedPath.lng, meta.predictedPath.lat],
             ],
           },
-          properties: { color: presentation.color, dimmed: properties.dimmed },
+          properties: {
+            i: index,
+            color: presentation.color,
+            dimmed: properties.dimmed,
+          },
         });
       }
       return;

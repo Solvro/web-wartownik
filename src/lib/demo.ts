@@ -34,6 +34,7 @@ export function demoThreats(now: number): LayerLocation<Layer.Drones>[] {
         updatedAt,
         uncertaintyKm: 8,
         predictedPath: destinationPoint(position, HEADING, PREDICTION_KM),
+        confirmedAt: updatedAt,
         demo: true,
       },
     };

@@ -55,6 +55,8 @@ import type { RegionCollection, RegionStatus } from "@/lib/regions";
 import type { LayerClusterWithLayer, LayerPoint } from "@/types/layers";
 import type { Coordinates } from "@/types/map";
 
+import { useLiveAnimation } from "./use-live-animation";
+
 configureMapLibreWorker();
 
 const INTERACTIVE_LAYERS = [
@@ -261,6 +263,8 @@ export function MapCanvas({
       duration: 300,
     });
   }, [sidePadding]);
+
+  useLiveAnimation(mapRef, mapReady, features, points, keys, selectedKey);
 
   const hasPulse = features.live.features.some(
     (feature) => feature.properties.pulse,

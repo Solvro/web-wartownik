@@ -52,6 +52,7 @@ export interface DroneMeta {
   updatedAt: string;
   uncertaintyKm: number | null;
   predictedPath: Coordinates | null;
+  confirmedAt: string | null;
   demo?: boolean;
 }
 
