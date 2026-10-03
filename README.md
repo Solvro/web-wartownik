@@ -95,3 +95,10 @@ np. zapytaniem `nwr["emergency"="defibrillator"](area.pl); out center meta;` i k
 
 `dev`, `build`, `start`, `lint`, `typecheck`, `format`, `format:check`, `db:generate`, `db:migrate`,
 `db:studio`, `db:seed`, `db:sync-shelters`.
+
+## Użycie AI
+
+Projekt powstał w całości podczas HackYeah 2026 (od 3.10, 11:00). Przy projektowaniu, programowaniu,
+debugowaniu i przygotowaniu dokumentacji korzystaliśmy z [Claude Code](https://claude.com/claude-code)
+z modelem Claude Opus 5.5 (effort `xhigh`). Zewnętrzne API, zbiory danych i biblioteki są wymienione
+w sekcjach „Źródła danych” i „Struktura”.
