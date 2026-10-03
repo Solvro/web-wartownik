@@ -5,3 +5,4 @@ apps/web/public/maplibre
 apps/web/public/geo
 apps/web/.next
 next-env.d.ts
+packages/shared/geo
