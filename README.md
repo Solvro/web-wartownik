@@ -26,40 +26,72 @@ i Białorusi z [geoBoundaries](https://www.geoboundaries.org) (ODbL) i Turf.
 | Poziom wody       | IMGW-PIB                                                                            |
 | Defibrylatory     | OpenStreetMap (`emergency=defibrillator`)                                           |
 
+## Struktura (monorepo pnpm + Turborepo)
+
+| Ścieżka           | Zawartość                                                                                              |
+| ----------------- | ------------------------------------------------------------------------------------------------------ |
+| `apps/web`        | Next.js 16 – strona i mapa, handler tRPC `/api/trpc`, start zadań w tle (`instrumentation.ts`)         |
+| `apps/mobile`     | Expo SDK 57 (React Native, expo-router, MapLibre RN) – mapa, „Mój region”, tryb offline, powiadomienia |
+| `packages/api`    | tRPC v11 (routery, serwisy źródeł danych, rejestrator pozycji zagrożeń, wysyłka powiadomień push)      |
+| `packages/db`     | Drizzle ORM: schemat, migracje, seed AED                                                               |
+| `packages/shared` | Typy, konfiguracja warstw, prezentacja jako czyste dane, statusy regionów, geometria granic            |
+
 ## Wymagane klucze API
 
 - `NASA_FIRMS_MAP_KEY`: klucz [NASA FIRMS](https://firms.modaps.eosdis.nasa.gov/api/map_key/),
-- `DATABASE_URI`: connection string do Postgresa z PostGIS.
+- `DATABASE_URI`: connection string do Postgresa z PostGIS,
+- opcjonalnie `EXPO_ACCESS_TOKEN`: token Expo, jeśli projekt wymaga autoryzacji wysyłki push,
+- opcjonalnie `DEMO_SCENARIO=lubelskie`: serwer dokłada symulowane drony (test powiadomień).
 
-Opcjonalne zmienne opisuje [`.env.example`](.env.example).
-
-Mapa, kafelki i wyszukiwarka nie wymagają kluczy.
+Mapa, kafelki i wyszukiwarka nie wymagają kluczy. Wszystkie zmienne trzymamy w `.env.local`
+w katalogu głównym repozytorium.
 
 ## Uruchomienie lokalne
 
 ```bash
-pnpm install                 # postinstall kopiuje web worker MapLibre do public/maplibre
+pnpm install
 docker compose up -d
 cp .env.example .env.local   # uzupełnij klucze
 pnpm db:migrate
-pnpm db:seed                 # wymaga assets/PL.geojson (patrz niżej)
+pnpm db:seed                 # wymaga packages/db/assets/PL.geojson (patrz niżej)
 pnpm db:sync-shelters
-pnpm dev
+pnpm dev                     # web na http://localhost:3000
 ```
 
-`DATABASE_URI` dla lokalnej bazy: `postgres://postgres:postgres@localhost:5434/postgres`.
+Przy starcie serwera migracje uruchamiają się automatycznie, schrony synchronizują się w tle, a co 15 s
+lider (wybrany przez `pg_try_advisory_lock`) zapisuje pozycje zagrożeń i liczy statusy województw do
+powiadomień push.
 
-Przy starcie serwera migracje uruchamiają się automatycznie, a schrony synchronizują się w tle,
-gdy tabela jest pusta lub dane są starsze niż 7 dni. Błąd bazy nie zatrzymuje serwera: warstwy
-niezależne od bazy działają dalej.
+### Aplikacja mobilna
+
+Aplikacja wymaga development builda (MapLibre to moduł natywny, nie działa w Expo Go).
+
+```bash
+cd apps/mobile
+EXPO_PUBLIC_API_URL=http://localhost:3000 pnpm android   # expo run:android
+adb reverse tcp:3000 tcp:3000                             # telefon przez USB widzi lokalny serwer
+```
+
+Bez `EXPO_PUBLIC_API_URL` aplikacja łączy się z `https://defensownik.solvro.pl`.
+
+Powiadomienia:
+
+- **push z serwera** wymaga projektu EAS (`extra.eas.projectId` w `app.json`) oraz na Androidzie
+  `google-services.json` z Firebase i poświadczeń FCM V1 wgranych do EAS,
+- bez tej konfiguracji aplikacja działa w **trybie lokalnym**: zadanie w tle (co ok. 15 min) i aplikacja na
+  pierwszym planie liczą statusy obserwowanych województw i pokazują lokalne powiadomienia.
+
+Tryb offline: ostatnie dane z serwera są zapisywane (cache zapytań na 7 dni), granice regionów są wbudowane
+w aplikację, a „Dane offline” w ustawieniach pobierają schrony i AED w promieniu 10/30/50 km – najbliższy
+schron i kompas działają wtedy bez internetu. Zgłoszenia wysłane bez sieci trafiają do kolejki.
 
 ### Dane defibrylatorów
 
-`pnpm db:seed` wczytuje `assets/PL.geojson` (FeatureCollection punktów OSM z właściwościami
+`pnpm db:seed` wczytuje `packages/db/assets/PL.geojson` (FeatureCollection punktów OSM z właściwościami
 `@osm_type`, `@osm_id`, `@osm_version` i tagami AED). Plik można przygotować z Overpass API,
 np. zapytaniem `nwr["emergency"="defibrillator"](area.pl); out center meta;` i konwersją do GeoJSON.
 
-## Skrypty
+## Skrypty (katalog główny)
 
 `dev`, `build`, `start`, `lint`, `typecheck`, `format`, `format:check`, `db:generate`, `db:migrate`,
 `db:studio`, `db:seed`, `db:sync-shelters`.
