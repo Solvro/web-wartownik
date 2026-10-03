@@ -34,12 +34,12 @@ import {
   clusterCircle,
   clusterCount,
   clusterGlow,
+  countryGlow,
+  countryOutline,
   firesHeatmap,
   historyCasing,
   historyLine,
   markerSymbol,
-  polandGlow,
-  polandOutline,
   pulseCircle,
   regionFill,
   regionHoverFill,
@@ -389,12 +389,16 @@ export function MapCanvas({
           />
         </Source>
       )}
-      <Source id="poland" type="geojson" data="/geo/poland.json">
-        <Layer id="poland-glow" beforeId={labelLayerId} {...polandGlow(dark)} />
+      <Source id="countries" type="geojson" data="/geo/countries.json">
         <Layer
-          id="poland-line"
+          id="countries-glow"
           beforeId={labelLayerId}
-          {...polandOutline(dark)}
+          {...countryGlow(dark)}
+        />
+        <Layer
+          id="countries-line"
+          beforeId={labelLayerId}
+          {...countryOutline(dark)}
         />
       </Source>
 

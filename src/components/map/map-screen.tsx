@@ -30,6 +30,7 @@ import type { LayerPoint } from "@/types/layers";
 import type { Coordinates } from "@/types/map";
 
 import { AlertBar } from "./alert-bar";
+import { BorderLegend } from "./border-legend";
 import { DetailsContent } from "./details-panel";
 import { LayerList } from "./layer-list";
 import { MapControls } from "./map-controls";
@@ -241,6 +242,8 @@ export function MapScreen() {
     />
   );
 
+  const borderLegend = <BorderLegend />;
+
   const layerList = (
     <LayerList
       counts={data.counts}
@@ -330,6 +333,7 @@ export function MapScreen() {
               <DrawerTitle className="sr-only">Warstwy</DrawerTitle>
               <div className="flex flex-col gap-3 overflow-y-auto p-4 *:shrink-0">
                 {situation}
+                {borderLegend}
                 {layerList}
                 <Button
                   onClick={() => {
@@ -395,7 +399,10 @@ export function MapScreen() {
             </div>
             <ScrollArea className="min-h-0 flex-1">
               <div className="flex flex-col gap-4 px-4 pb-4">
-                {situation}
+                <div className="flex flex-col gap-2">
+                  {situation}
+                  {borderLegend}
+                </div>
                 <div>
                   <h2 className="mb-1.5 px-1 text-xs font-medium tracking-wider text-muted-foreground uppercase">
                     Warstwy

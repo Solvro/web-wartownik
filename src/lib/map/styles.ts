@@ -275,9 +275,30 @@ function regionOpacity(dark: boolean, scale: number): ExpressionSpecification {
     0.24 * scale,
     "watch",
     0.15 * scale,
-    ["case", ["==", ["get", "country"], "PL"], (dark ? 0.05 : 0.04) * scale, 0],
+    (dark ? 0.06 : 0.05) * scale,
   ];
 }
+
+export const COUNTRY_COLORS = {
+  PL: { label: "Polska", dark: "#60a5fa", light: "#2563eb" },
+  UA: { label: "Ukraina", dark: "#2dd4bf", light: "#0d9488" },
+  BY: { label: "Białoruś", dark: "#c084fc", light: "#9333ea" },
+} as const;
+
+function countryColor(dark: boolean): ExpressionSpecification {
+  const theme = dark ? "dark" : "light";
+  return [
+    "match",
+    ["get", "country"],
+    "UA",
+    COUNTRY_COLORS.UA[theme],
+    "BY",
+    COUNTRY_COLORS.BY[theme],
+    COUNTRY_COLORS.PL[theme],
+  ];
+}
+
+const isQuiet: ExpressionSpecification = ["==", ["get", "status"], "none"];
 
 export function regionFill(
   dark: boolean,
@@ -285,7 +306,7 @@ export function regionFill(
   return {
     type: "fill",
     paint: {
-      "fill-color": regionColor,
+      "fill-color": ["case", isQuiet, countryColor(dark), regionColor],
       "fill-opacity": [
         "interpolate",
         ["linear"],
@@ -312,12 +333,8 @@ export function regionLine(
   return {
     type: "line",
     paint: {
-      "line-color": [
-        "case",
-        ["==", ["get", "status"], "none"],
-        dark ? "rgba(148,163,184,0.45)" : "rgba(71,85,105,0.4)",
-        regionColor,
-      ],
+      "line-color": ["case", isQuiet, countryColor(dark), regionColor],
+      "line-opacity": ["case", isQuiet, dark ? 0.4 : 0.45, 1],
       "line-width": [
         "interpolate",
         ["linear"],
@@ -331,26 +348,26 @@ export function regionLine(
   };
 }
 
-export function polandOutline(
+export function countryOutline(
   dark: boolean,
 ): Omit<LineLayerSpecification, "id" | "source"> {
   return {
     type: "line",
     paint: {
-      "line-color": dark ? "#60a5fa" : "#2563eb",
+      "line-color": countryColor(dark),
       "line-width": ["interpolate", ["linear"], ["zoom"], 4, 1.4, 9, 2.6],
       "line-opacity": 0.85,
     },
   };
 }
 
-export function polandGlow(
+export function countryGlow(
   dark: boolean,
 ): Omit<LineLayerSpecification, "id" | "source"> {
   return {
     type: "line",
     paint: {
-      "line-color": dark ? "#3b82f6" : "#60a5fa",
+      "line-color": countryColor(dark),
       "line-width": ["interpolate", ["linear"], ["zoom"], 4, 6, 9, 12],
       "line-blur": 6,
       "line-opacity": 0.35,

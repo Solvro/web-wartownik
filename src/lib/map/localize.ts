@@ -7,7 +7,7 @@ const POLISH_NAME: ExpressionSpecification = [
   ["get", "name"],
 ];
 
-const HIDDEN_LAYER = /place_state|state_label|admin_1/;
+const HIDDEN_LAYER = /place_state|label_state|state_label|admin_1/;
 
 export function localizeBaseStyle(map: MapLibreMap) {
   for (const layer of map.getStyle().layers) {
