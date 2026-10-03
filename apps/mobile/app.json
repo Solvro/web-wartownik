@@ -41,10 +41,18 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Wartownik u\u017cywa lokalizacji, aby pokaza\u0107 status Twojego wojew\u00f3dztwa i najbli\u017csze schrony."
+          "locationWhenInUsePermission": "Wartownik używa lokalizacji, aby pokazać status Twojego województwa i najbliższe schrony."
         }
       ],
-      "@maplibre/maplibre-react-native"
+      "@maplibre/maplibre-react-native",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

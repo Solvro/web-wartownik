@@ -173,15 +173,19 @@ TaskManager.defineTask(BACKGROUND_TASK, async () => {
 });
 
 export async function registerBackgroundCheck() {
-  const status = await BackgroundTask.getStatusAsync();
-  if (status !== BackgroundTask.BackgroundTaskStatus.Available) {
-    return;
-  }
-  const registered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_TASK);
-  if (!registered) {
-    await BackgroundTask.registerTaskAsync(BACKGROUND_TASK, {
-      minimumInterval: BACKGROUND_INTERVAL_MINUTES,
-    });
+  try {
+    const status = await BackgroundTask.getStatusAsync();
+    if (status !== BackgroundTask.BackgroundTaskStatus.Available) {
+      return;
+    }
+    const registered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_TASK);
+    if (!registered) {
+      await BackgroundTask.registerTaskAsync(BACKGROUND_TASK, {
+        minimumInterval: BACKGROUND_INTERVAL_MINUTES,
+      });
+    }
+  } catch (error) {
+    console.warn("Background checks unavailable:", error);
   }
 }
 

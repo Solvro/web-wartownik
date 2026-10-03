@@ -28,6 +28,7 @@ const immutable = [
 
 const nextConfig: NextConfig = {
   typedRoutes: true,
+  allowedDevOrigins: ["192.168.*.*", "10.*.*.*", "172.*.*.*", "*.local"],
   env: {
     NEXT_PUBLIC_GEO_VERSION: geoDataVersion(),
   },
