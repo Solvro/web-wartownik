@@ -8,6 +8,7 @@ type Style = {
 };
 
 const STYLE_URL = `${API_URL}/api/map/styles/dark`;
+const STYLE_STALE_MS = 24 * 60 * 60 * 1000;
 
 const OFFLINE_STYLE = {
   version: 8,
@@ -29,7 +30,7 @@ export function useBaseStyle() {
       const response = await fetch(STYLE_URL, { signal });
       return localizeStyle((await response.json()) as Style);
     },
-    staleTime: Infinity,
+    staleTime: STYLE_STALE_MS,
     networkMode: "offlineFirst",
   });
   return data ?? OFFLINE_STYLE;
