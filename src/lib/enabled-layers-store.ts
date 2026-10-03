@@ -1,24 +1,15 @@
 import Cookies from "js-cookie";
-import { z } from "zod";
 
 import { ENABLED_LAYERS_COOKIE } from "@/config/constants";
 import { LAYERS, Layer } from "@/types/layers";
 import type { EnabledLayers } from "@/types/layers";
 
-const DEFAULT_ENABLED = Object.fromEntries(
+export const DEFAULT_ENABLED_LAYERS = Object.fromEntries(
   LAYERS.map((layer) => [
     layer,
     layer === Layer.Drones || layer === Layer.Shelters,
   ]),
 ) as EnabledLayers;
-
-const enabledLayersSchema = z.object(
-  Object.fromEntries(
-    LAYERS.map((layer) => [layer, z.boolean().default(DEFAULT_ENABLED[layer])]),
-  ) as Record<Layer, z.ZodDefault<z.ZodBoolean>>,
-);
-
-export const DEFAULT_ENABLED_LAYERS = DEFAULT_ENABLED;
 
 function readCookie(): EnabledLayers {
   try {
@@ -26,7 +17,20 @@ function readCookie(): EnabledLayers {
     if (raw === undefined) {
       return DEFAULT_ENABLED_LAYERS;
     }
-    return enabledLayersSchema.parse(JSON.parse(raw));
+    const parsed = JSON.parse(raw) as unknown;
+    if (typeof parsed !== "object" || parsed === null) {
+      return DEFAULT_ENABLED_LAYERS;
+    }
+    const record = parsed as Record<string, unknown>;
+    return Object.fromEntries(
+      LAYERS.map((layer) => {
+        const value = record[layer];
+        return [
+          layer,
+          typeof value === "boolean" ? value : DEFAULT_ENABLED_LAYERS[layer],
+        ];
+      }),
+    ) as EnabledLayers;
   } catch {
     return DEFAULT_ENABLED_LAYERS;
   }

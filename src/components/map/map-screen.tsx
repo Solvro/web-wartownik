@@ -8,7 +8,6 @@ import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Brand } from "@/components/brand";
-import { ReportDialog } from "@/components/report-dialog";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
@@ -38,6 +37,12 @@ const MapCanvas = dynamic(
     ssr: false,
     loading: () => <div className="absolute inset-0 animate-pulse bg-muted" />,
   },
+);
+
+const ReportDialog = dynamic(
+  () =>
+    import("@/components/report-dialog").then((module) => module.ReportDialog),
+  { ssr: false },
 );
 
 const DEMO_TICK_MS = 2000;
@@ -385,7 +390,9 @@ export function MapScreen() {
         </>
       )}
 
-      <ReportDialog open={reportOpen} onOpenChange={setReportOpen} />
+      {reportOpen ? (
+        <ReportDialog open={reportOpen} onOpenChange={setReportOpen} />
+      ) : null}
     </main>
   );
 }
