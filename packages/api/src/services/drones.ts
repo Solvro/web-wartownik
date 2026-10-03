@@ -1,4 +1,5 @@
 import { PREDICTION_LIMITS } from "@wartownik/shared/config/threats";
+import { demoThreats } from "@wartownik/shared/demo";
 import { destinationPoint } from "@wartownik/shared/geo/geo";
 import type {
   Layer,
@@ -137,5 +138,10 @@ export function toDronePoints(
 
 export const getDrones: LayerFetchFunction<Layer.Drones> = async () => {
   const threats = await fetchThreats({ next: { revalidate: 10 } });
-  return { points: toDronePoints(threats, Date.now()), clusters: [] };
+  const now = Date.now();
+  const points = toDronePoints(threats, now);
+  if (process.env.DEMO_SCENARIO === "lubelskie") {
+    points.push(...demoThreats(now));
+  }
+  return { points, clusters: [] };
 };
