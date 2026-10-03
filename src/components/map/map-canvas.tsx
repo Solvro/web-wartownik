@@ -1,6 +1,7 @@
 "use client";
 
 import type { Feature, FeatureCollection, Point } from "geojson";
+import { MapPin } from "lucide-react";
 import type {
   GeoJSONSource,
   MapLayerMouseEvent,
@@ -12,6 +13,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import MapGL, {
   AttributionControl,
   Layer,
+  Marker,
   Source,
 } from "react-map-gl/maplibre";
 import type { MapRef } from "react-map-gl/maplibre";
@@ -49,8 +51,10 @@ import {
   zoneOutline,
 } from "@/lib/map/styles";
 import { configureMapLibreWorker } from "@/lib/map/worker";
+import type { MapHandle } from "@/lib/providers/map-provider";
 import type { RegionCollection } from "@/lib/regions";
 import type { LayerClusterWithLayer, LayerPoint } from "@/types/layers";
+import type { Coordinates } from "@/types/map";
 
 configureMapLibreWorker();
 
@@ -66,6 +70,7 @@ const PULSE_PERIOD_MS = 1600;
 
 interface MapCanvasProps {
   sidePadding: number;
+  searchMarker: Coordinates | null;
   points: LayerPoint[];
   keys: string[];
   clusters: LayerClusterWithLayer[];
@@ -77,12 +82,21 @@ interface MapCanvasProps {
   onHoverRegion(regionId: string | null): void;
 }
 
+function createMapHandle(map: MapLibreMap): MapHandle {
+  return {
+    flyTo: (options) => map.flyTo({ ...options, essential: true }),
+    fitBounds: (bounds, options) => map.fitBounds(bounds, options),
+    zoomBy: (delta) => map.easeTo({ zoom: map.getZoom() + delta }),
+  };
+}
+
 function firstSymbolLayerId(map: MapLibreMap): string | undefined {
   return map.getStyle().layers.find((layer) => layer.type === "symbol")?.id;
 }
 
 export function MapCanvas({
   sidePadding,
+  searchMarker,
   points,
   keys,
   clusters,
@@ -177,11 +191,7 @@ export function MapCanvas({
     if (map === undefined) {
       return;
     }
-    registerMap({
-      flyTo: (options) => map.flyTo({ ...options, essential: true }),
-      fitBounds: (bounds, options) => map.fitBounds(bounds, options),
-      zoomBy: (delta) => map.easeTo({ zoom: map.getZoom() + delta }),
-    });
+    registerMap(createMapHandle(map));
     localizeBaseStyle(map);
     setLabelLayerId(firstSymbolLayerId(map));
     map.setPadding({ top: 0, right: 0, bottom: 0, left: sidePadding });
@@ -196,12 +206,19 @@ export function MapCanvas({
     void locateUser();
   }, [registerMap, reportViewport, locateUser, sidePadding]);
 
-  useEffect(() => () => registerMap(null), [registerMap]);
+  useEffect(() => {
+    const map = mapRef.current?.getMap();
+    if (map !== undefined) {
+      registerMap(createMapHandle(map));
+    }
+    return () => registerMap(null);
+  }, [registerMap]);
 
   useEffect(() => {
-    mapRef.current
-      ?.getMap()
-      .setPadding({ top: 0, right: 0, bottom: 0, left: sidePadding });
+    mapRef.current?.getMap().easeTo({
+      padding: { top: 0, right: 0, bottom: 0, left: sidePadding },
+      duration: 300,
+    });
   }, [sidePadding]);
 
   useEffect(() => {
@@ -400,6 +417,19 @@ export function MapCanvas({
         <Layer id="live-arrows" {...arrowSymbol} />
         <Layer id="live-markers" {...markerSymbol()} />
       </Source>
+
+      {searchMarker === null ? null : (
+        <Marker
+          longitude={searchMarker.lng}
+          latitude={searchMarker.lat}
+          anchor="bottom"
+        >
+          <MapPin
+            className="size-9 animate-in fill-red-600 text-white drop-shadow-lg zoom-in-50"
+            strokeWidth={1.5}
+          />
+        </Marker>
+      )}
 
       <Source id="user" type="geojson" data={userFeature}>
         <Layer id="user-halo" {...userHalo} />

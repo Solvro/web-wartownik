@@ -9,10 +9,17 @@ import { useDebounce } from "react-use";
 import { useMap } from "@/hooks/use-map";
 import { cn } from "@/lib/utils";
 import type { GeocodeResult } from "@/types/geocode";
+import type { Coordinates } from "@/types/map";
 
 const DEBOUNCE_MS = 250;
 
-export function SearchBox({ className }: { className?: string }) {
+export function SearchBox({
+  className,
+  onSelectResult,
+}: {
+  className?: string;
+  onSelectResult(location: Coordinates | null): void;
+}) {
   const { flyTo, fitBounds } = useMap();
   const listId = useId();
   const [query, setQuery] = useState("");
@@ -43,6 +50,7 @@ export function SearchBox({ className }: { className?: string }) {
     } else {
       fitBounds(result.bounds);
     }
+    onSelectResult({ lat: result.lat, lng: result.lng });
     setQuery(result.label);
     setOpen(false);
   };
@@ -91,7 +99,10 @@ export function SearchBox({ className }: { className?: string }) {
         ) : query === "" ? null : (
           <button
             type="button"
-            onClick={() => setQuery("")}
+            onClick={() => {
+              setQuery("");
+              onSelectResult(null);
+            }}
             className="text-muted-foreground hover:text-foreground"
             aria-label="Wyczyść"
           >

@@ -21,6 +21,7 @@ import { computeRegionStates, regionBounds } from "@/lib/regions";
 import type { RegionCollection } from "@/lib/regions";
 import { LAYERS, Layer } from "@/types/layers";
 import type { LayerPoint } from "@/types/layers";
+import type { Coordinates } from "@/types/map";
 
 import { AlertBar } from "./alert-bar";
 import { DetailsContent } from "./details-panel";
@@ -76,6 +77,7 @@ export function MapScreen() {
   const [hoveredRegionId, setHoveredRegionId] = useState<string | null>(null);
   const [layersOpen, setLayersOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+  const [searchMarker, setSearchMarker] = useState<Coordinates | null>(null);
 
   const data = useLayerData(enabledLayers, viewport);
 
@@ -236,6 +238,7 @@ export function MapScreen() {
     <main className="fixed inset-0 overflow-hidden">
       <MapCanvas
         sidePadding={isMobile ? 0 : 392}
+        searchMarker={searchMarker}
         points={points}
         keys={keys}
         clusters={data.clusters}
@@ -261,7 +264,7 @@ export function MapScreen() {
             <Link href="/" aria-label="Defensownik">
               <Brand className="[&>span:last-child]:hidden" />
             </Link>
-            <SearchBox className="flex-1" />
+            <SearchBox className="flex-1" onSelectResult={setSearchMarker} />
             <Button
               variant="ghost"
               size="icon"
@@ -339,7 +342,7 @@ export function MapScreen() {
               <ThemeToggle />
             </div>
             <div className="px-4 pb-3">
-              <SearchBox />
+              <SearchBox onSelectResult={setSearchMarker} />
             </div>
             <ScrollArea className="min-h-0 flex-1">
               <div className="flex flex-col gap-4 px-4 pb-4">
