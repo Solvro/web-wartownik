@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Defensownik
 
-## Getting Started
+Mapa bezpieczeństwa dla Polski: schrony, drony i rakiety, samoloty wojskowe, jakość powietrza,
+pożary, stany ostrzegawcze rzek, defibrylatory (AED) i zgłoszenia mieszkańców w jednym miejscu,
+plus interaktywna lista „plecaka bezpieczeństwa”.
 
-First, run the development server:
+Stack: Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, shadcn/ui, TanStack Query,
+Drizzle ORM, PostgreSQL 17 + PostGIS 3.5, Google Maps (`google-map-react`), `supercluster`.
+
+## Źródła danych
+
+| Warstwa           | Źródło                                                                              |
+| ----------------- | ----------------------------------------------------------------------------------- |
+| Schrony           | KG PSP, [gdziesieukryc.pl](https://gdziesieukryc.pl) (CSV, synchronizacja co 7 dni) |
+| Drony i rakiety   | [NEPTUN](https://neptun.in.ua/) (agregator OSINT)                                   |
+| Samoloty wojskowe | [adsb.lol](https://adsb.lol/) `/v2/mil` (ADS-B, ODbL)                               |
+| Jakość powietrza  | GIOŚ                                                                                |
+| Pożary            | NASA FIRMS (VIIRS NOAA-20)                                                          |
+| Poziom wody       | IMGW-PIB                                                                            |
+| Defibrylatory     | OpenStreetMap (`emergency=defibrillator`)                                           |
+
+## Wymagane klucze API
+
+- `NEXT_PUBLIC_GOOGLE_MAPS_KEY`: Google Maps JavaScript API z włączonymi Places i Geocoding,
+- `NASA_FIRMS_MAP_KEY`: klucz [NASA FIRMS](https://firms.modaps.eosdis.nasa.gov/api/map_key/),
+- `DATABASE_URI`: connection string do Postgresa z PostGIS.
+
+Opcjonalne zmienne opisuje [`.env.example`](.env.example).
+
+## Uruchomienie lokalne
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+docker compose up -d
+cp .env.example .env.local   # uzupełnij klucze
+pnpm db:migrate
+pnpm db:seed                 # wymaga assets/PL.geojson (patrz niżej)
+pnpm db:sync-shelters
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`DATABASE_URI` dla lokalnej bazy: `postgres://postgres:postgres@localhost:5434/postgres`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Przy starcie serwera migracje uruchamiają się automatycznie, a schrony synchronizują się w tle,
+gdy tabela jest pusta lub dane są starsze niż 7 dni. Błąd bazy nie zatrzymuje serwera: warstwy
+niezależne od bazy działają dalej.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Dane defibrylatorów
 
-## Learn More
+`pnpm db:seed` wczytuje `assets/PL.geojson` (FeatureCollection punktów OSM z właściwościami
+`@osm_type`, `@osm_id`, `@osm_version` i tagami AED). Plik można przygotować z Overpass API,
+np. zapytaniem `nwr["emergency"="defibrillator"](area.pl); out center meta;` i konwersją do GeoJSON.
 
-To learn more about Next.js, take a look at the following resources:
+## Skrypty
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`dev`, `build`, `start`, `lint`, `typecheck`, `format`, `format:check`, `db:generate`, `db:migrate`,
+`db:studio`, `db:seed`, `db:sync-shelters`.
