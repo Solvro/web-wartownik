@@ -11,7 +11,13 @@ import type { Coordinates } from "@/types/map";
 
 export const NEPTUN_API_URL = "https://neptun.in.ua/api/v1/threats";
 
-interface Threat {
+export interface ThreatTrailPoint {
+  lat: number;
+  lon: number;
+  t: string;
+}
+
+export interface Threat {
   id: string;
   type: ThreatType;
   title: string;
@@ -32,6 +38,18 @@ interface Threat {
   advisory?: boolean;
   areaOnly?: boolean;
   explanationShort?: string;
+  trail?: ThreatTrailPoint[] | null;
+}
+
+export async function fetchThreats(init?: RequestInit): Promise<Threat[]> {
+  const { threats } = await fetchQuery<{
+    serverTime: string;
+    threats: Threat[];
+  }>(NEPTUN_API_URL, {
+    ...init,
+    headers: { "User-Agent": "defensownik.solvro.pl" },
+  });
+  return threats;
 }
 
 const PREDICTION_LIMITS: Record<
@@ -87,13 +105,7 @@ function predictPath(
 }
 
 export const getDrones: LayerFetchFunction<Layer.Drones> = async () => {
-  const { threats } = await fetchQuery<{
-    serverTime: string;
-    threats: Threat[];
-  }>(NEPTUN_API_URL, {
-    headers: { "User-Agent": "defensownik.solvro.pl" },
-    next: { revalidate: 10 },
-  });
+  const threats = await fetchThreats({ next: { revalidate: 10 } });
   const now = Date.now();
 
   const points = threats

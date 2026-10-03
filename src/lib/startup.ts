@@ -2,6 +2,7 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import path from "node:path";
 
 import { db } from "@/lib/db";
+import { startThreatRecorder } from "@/lib/jobs/scheduler";
 import { syncSheltersIfStale } from "@/lib/services/shelters";
 
 export async function runStartupTasks() {
@@ -14,4 +15,5 @@ export async function runStartupTasks() {
     return;
   }
   void syncSheltersIfStale();
+  startThreatRecorder();
 }

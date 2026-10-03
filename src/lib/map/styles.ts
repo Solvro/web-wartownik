@@ -432,19 +432,41 @@ export function historyCasing(
   };
 }
 
-export const historyLine: Omit<LineLayerSpecification, "id" | "source"> = {
-  type: "line",
-  layout: { "line-cap": "round", "line-join": "round" },
+function withAlpha(hex: string, alpha: number): string {
+  const value = Number.parseInt(hex.slice(1), 16);
+  return `rgba(${(value >> 16) & 255},${(value >> 8) & 255},${value & 255},${alpha})`;
+}
+
+export function historyLine(
+  color: string = HISTORY_COLOR,
+): Omit<LineLayerSpecification, "id" | "source"> {
+  return {
+    type: "line",
+    layout: { "line-cap": "round", "line-join": "round" },
+    paint: {
+      "line-width": 2.5,
+      "line-gradient": [
+        "interpolate",
+        ["linear"],
+        ["line-progress"],
+        0,
+        withAlpha(color, 0.15),
+        1,
+        color,
+      ],
+    },
+  };
+}
+
+export const historyPoints = (
+  color: string = HISTORY_COLOR,
+): Omit<CircleLayerSpecification, "id" | "source"> => ({
+  type: "circle",
+  filter: ["==", ["geometry-type"], "Point"],
   paint: {
-    "line-width": 2.5,
-    "line-gradient": [
-      "interpolate",
-      ["linear"],
-      ["line-progress"],
-      0,
-      "rgba(34,211,238,0.15)",
-      1,
-      HISTORY_COLOR,
-    ],
+    "circle-radius": 3,
+    "circle-color": color,
+    "circle-stroke-width": 1.5,
+    "circle-stroke-color": "#ffffff",
   },
-};
+});

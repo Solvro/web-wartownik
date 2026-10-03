@@ -17,8 +17,10 @@ import { useLayerData } from "@/hooks/use-layer-data";
 import { useMap } from "@/hooks/use-map";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useStoredFlag } from "@/hooks/use-stored-flag";
+import { useThreatTrack } from "@/hooks/use-threat-track";
 import { demoThreats } from "@/lib/demo";
 import { pointKeys } from "@/lib/map/features";
+import { presentPoint } from "@/lib/presentation";
 import {
   REGION_STATUS_VISUALS,
   computeRegionStates,
@@ -158,15 +160,27 @@ export function MapScreen() {
   const selectedAircraftHex =
     selectedPoint?.layer === Layer.Aircraft ? selectedPoint.meta.id : null;
   const { data: aircraftDetails } = useAircraftDetails(selectedAircraftHex);
+  const selectedThreatId =
+    selectedPoint?.layer === Layer.Drones && selectedPoint.meta.demo !== true
+      ? selectedPoint.meta.id
+      : null;
+  const { data: threatTrack } = useThreatTrack(selectedThreatId);
   const history = useMemo(() => {
     if (
-      selectedPoint?.layer !== Layer.Aircraft ||
-      aircraftDetails === undefined
+      selectedPoint?.layer === Layer.Aircraft &&
+      aircraftDetails !== undefined
     ) {
-      return [];
+      return [...aircraftDetails.track, selectedPoint];
     }
-    return [...aircraftDetails.track, selectedPoint];
-  }, [selectedPoint, aircraftDetails]);
+    if (selectedPoint?.layer === Layer.Drones && threatTrack !== undefined) {
+      return threatTrack;
+    }
+    return [];
+  }, [selectedPoint, aircraftDetails, threatTrack]);
+  const historyColor =
+    selectedPoint?.layer === Layer.Drones
+      ? presentPoint(selectedPoint).color
+      : undefined;
 
   const selectPoint = useCallback(
     (index: number) => {
@@ -272,6 +286,8 @@ export function MapScreen() {
         sidePadding={isMobile || !panelOpen ? 0 : 392}
         searchMarker={searchMarker}
         history={history}
+        historyColor={historyColor}
+        historyMarkers={selectedPoint?.layer === Layer.Drones}
         points={points}
         keys={keys}
         clusters={data.clusters}

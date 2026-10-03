@@ -12,6 +12,7 @@ import { Layer } from "@/types/layers";
 import type { LayerPoint } from "@/types/layers";
 
 import { AircraftExtras } from "./aircraft-extras";
+import { ThreatTrackInfo } from "./threat-track-info";
 
 export function DetailsContent({
   point,
@@ -86,6 +87,9 @@ export function DetailsContent({
 
       {point.layer === Layer.Aircraft ? (
         <AircraftExtras hex={point.meta.id} />
+      ) : null}
+      {point.layer === Layer.Drones && point.meta.demo !== true ? (
+        <ThreatTrackInfo threatId={point.meta.id} />
       ) : null}
 
       {details.length > 0 ? (
