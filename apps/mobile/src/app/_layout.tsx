@@ -9,6 +9,7 @@ import {
   ensureAlertChannel,
   syncNotificationSubscription,
 } from "@/lib/notifications";
+import { loadOfflineMapStatus } from "@/lib/offline-map";
 import { loadOfflinePack } from "@/lib/offline-pack";
 import {
   CACHE_MAX_AGE_MS,
@@ -25,6 +26,7 @@ export default function RootLayout() {
     void (async () => {
       const settings = await loadSettings();
       await loadOfflinePack();
+      void loadOfflineMapStatus().catch(() => undefined);
       await ensureAlertChannel();
       if (settings.notificationsEnabled) {
         await syncNotificationSubscription(settings).catch(() => undefined);

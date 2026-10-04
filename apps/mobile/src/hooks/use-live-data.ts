@@ -11,6 +11,8 @@ import type {
 } from "@wartownik/shared/types/layers";
 import { useMemo } from "react";
 
+import { useOfflinePack } from "@/lib/offline-pack";
+import type { OfflinePack } from "@/lib/offline-pack";
 import { REGIONS } from "@/lib/regions";
 import { useTRPC } from "@/lib/trpc";
 
@@ -42,6 +44,26 @@ function viewportInput(viewport: MapViewport) {
   };
 }
 
+const OFFLINE_LAYERS = new Set([Layer.Shelters, Layer.AEDs]);
+
+function offlinePoints(
+  pack: OfflinePack | null,
+  layer: Layer,
+  viewport: MapViewport | null,
+): LayerLocation[] | undefined {
+  if (pack === null || viewport === null) {
+    return undefined;
+  }
+  const points = layer === Layer.Shelters ? pack.shelters : pack.aeds;
+  return points.filter(
+    (point) =>
+      point.lng >= viewport.west &&
+      point.lng <= viewport.east &&
+      point.lat >= viewport.south &&
+      point.lat <= viewport.north,
+  );
+}
+
 export interface LiveData {
   points: LayerPoint[];
   clusters: LayerClusterWithLayer[];
@@ -57,6 +79,7 @@ export function useLiveData(
   viewport: MapViewport | null,
 ): LiveData {
   const trpc = useTRPC();
+  const pack = useOfflinePack();
   const viewportParams =
     viewport === null ? undefined : viewportInput(viewport);
 
@@ -95,11 +118,24 @@ export function useLiveData(
           return;
         }
         isFetching ||= query.isFetching;
-        if (query.isError) {
+        const unavailable =
+          query.isError || query.isPaused || query.data === undefined;
+        const offline =
+          OFFLINE_LAYERS.has(layer) && unavailable
+            ? offlinePoints(pack, layer, viewport)
+            : undefined;
+        const fallback =
+          offline?.length === 0 && query.data !== undefined
+            ? undefined
+            : offline;
+        if (query.isError && fallback === undefined) {
           failedLayers.push(layer);
         }
-        for (const point of query.data?.points ?? []) {
+        for (const point of fallback ?? query.data?.points ?? []) {
           points.push({ ...point, layer } as LayerPoint);
+        }
+        if (fallback !== undefined) {
+          return;
         }
         for (const cluster of query.data?.clusters ?? []) {
           clusters.push({ ...cluster, layer });

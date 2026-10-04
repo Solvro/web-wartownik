@@ -12,17 +12,21 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Segmented } from "@/components/segmented";
+import { baseStyleQueryOptions } from "@/hooks/use-base-style";
 import { useUserLocation } from "@/hooks/use-user-location";
 import { API_URL } from "@/lib/config";
 import {
   requestNotificationPermission,
   syncNotificationSubscription,
 } from "@/lib/notifications";
+import { downloadOfflineMap, useOfflineMapStatus } from "@/lib/offline-map";
+import type { OfflineMapStatus } from "@/lib/offline-map";
 import {
   deleteOfflinePack,
   downloadOfflinePack,
   useOfflinePack,
 } from "@/lib/offline-pack";
+import { queryClient } from "@/lib/query-client";
 import { POLISH_REGIONS, regionAt } from "@/lib/regions";
 import { getSettings, updateSettings, useSettings } from "@/lib/settings";
 import type { AlertThreshold, Settings } from "@/lib/settings";
@@ -35,9 +39,24 @@ const dateFormat = new Intl.DateTimeFormat("pl-PL", {
   minute: "2-digit",
 });
 
+function mapStatusText(status: OfflineMapStatus) {
+  switch (status.state) {
+    case "downloading":
+      return `Pobieram mapę okolicy… ${Math.floor(status.percentage)}%`;
+    case "complete":
+      return "Mapa okolicy zapisana offline.";
+    case "error":
+      return "Mapa offline niekompletna – odśwież dane okolicy.";
+    case "idle":
+      return null;
+  }
+}
+
 export default function SettingsScreen() {
   const settings = useSettings();
   const pack = useOfflinePack();
+  const mapStatus = useOfflineMapStatus();
+  const mapText = mapStatusText(mapStatus);
   const { location, refresh } = useUserLocation();
   const [mode, setMode] = useState<"push" | "local" | null>(null);
   const [downloading, setDownloading] = useState(false);
@@ -94,7 +113,12 @@ export default function SettingsScreen() {
     }
     setDownloading(true);
     try {
-      await downloadOfflinePack(origin, settings.offlineRadiusKm);
+      await downloadOfflinePack(origin, settings.offlineRadiusKm, () =>
+        queryClient.fetchQuery({ ...baseStyleQueryOptions, staleTime: 0 }),
+      );
+      void downloadOfflineMap(origin, settings.offlineRadiusKm).catch(
+        () => undefined,
+      );
     } catch {
       Alert.alert(
         "Nie udało się pobrać",
@@ -179,10 +203,10 @@ export default function SettingsScreen() {
 
         <Text style={styles.section}>Dane offline</Text>
         <View style={styles.card}>
-          <Text style={styles.title}>Schrony i AED w mojej okolicy</Text>
+          <Text style={styles.title}>Mapa, schrony i AED w mojej okolicy</Text>
           <Text style={styles.muted}>
-            Pobierz je teraz – w razie braku sieci aplikacja wskaże najbliższy
-            schron z GPS.
+            Pobierz je teraz – w razie braku sieci aplikacja pokaże mapę ze
+            schronami i wskaże najbliższy z GPS.
           </Text>
           <Text style={styles.label}>Promień</Text>
           <Segmented<10 | 30 | 50>
@@ -201,10 +225,13 @@ export default function SettingsScreen() {
               promieniu {pack.radiusKm} km.
             </Text>
           ) : null}
+          {mapText !== null ? (
+            <Text style={styles.muted}>{mapText}</Text>
+          ) : null}
           <Pressable
             style={styles.primaryButton}
             onPress={() => void download()}
-            disabled={downloading}
+            disabled={downloading || mapStatus.state === "downloading"}
           >
             {downloading ? (
               <ActivityIndicator color="#fff" />

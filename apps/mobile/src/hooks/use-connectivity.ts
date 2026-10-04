@@ -6,6 +6,7 @@ import { useTRPC } from "@/lib/trpc";
 export type Connectivity = "online" | "no-network" | "server-down";
 
 const PING_INTERVAL_MS = 30_000;
+const PING_RETRY_INTERVAL_MS = 5_000;
 
 export function useConnectivity(): Connectivity {
   const trpc = useTRPC();
@@ -14,14 +15,17 @@ export function useConnectivity(): Connectivity {
   const ping = useQuery({
     ...trpc.system.ping.queryOptions(),
     enabled: !offline,
-    refetchInterval: PING_INTERVAL_MS,
-    retry: 1,
+    refetchInterval: (query) =>
+      query.state.status === "error"
+        ? PING_RETRY_INTERVAL_MS
+        : PING_INTERVAL_MS,
+    retry: 2,
     networkMode: "always",
   });
   if (offline) {
     return "no-network";
   }
-  if (ping.isError && ping.failureCount >= 2) {
+  if (ping.isError) {
     return "server-down";
   }
   return "online";

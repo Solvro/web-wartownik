@@ -4,6 +4,7 @@ import type { Coordinates } from "@wartownik/shared/types/map";
 import { File, Paths } from "expo-file-system";
 import { useSyncExternalStore } from "react";
 
+import { deleteOfflineMap } from "./offline-map";
 import { trpcClient } from "./trpc";
 
 export interface OfflinePack {
@@ -12,6 +13,7 @@ export interface OfflinePack {
   generatedAt: string;
   shelters: LayerLocation<Layer.Shelters>[];
   aeds: LayerLocation<Layer.AEDs>[];
+  style?: unknown;
 }
 
 const packFile = () => new File(Paths.document, "offline-pack.json");
@@ -42,8 +44,13 @@ export async function loadOfflinePack(): Promise<OfflinePack | null> {
 export async function downloadOfflinePack(
   center: Coordinates,
   radiusKm: 10 | 30 | 50,
+  fetchStyle: () => Promise<unknown>,
 ): Promise<OfflinePack> {
-  const result = await trpcClient.offline.pack.query({ ...center, radiusKm });
+  const [data, style] = await Promise.all([
+    trpcClient.offline.pack.query({ ...center, radiusKm }),
+    fetchStyle().catch(() => pack?.style),
+  ]);
+  const result: OfflinePack = { ...data, style };
   const file = packFile();
   if (!file.exists) {
     file.create({ intermediates: true });
@@ -55,6 +62,7 @@ export async function downloadOfflinePack(
 }
 
 export function deleteOfflinePack() {
+  void deleteOfflineMap().catch(() => undefined);
   const file = packFile();
   if (file.exists) {
     file.delete();
