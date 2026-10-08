@@ -5,12 +5,19 @@ import type {
 } from "@wartownik/shared/types/ukraine-alerts";
 
 import { fetchQuery } from "../helpers/fetch-query";
+import { neptunStream } from "./neptun-stream";
 
 const NEPTUN_ALERTS_URL = "https://neptun.in.ua/api/v1/alerts";
 
 const RAION_ALIASES: Record<string, string> = {
   новомосковський: "самарівський",
 };
+
+export interface NeptunAlertsPayload {
+  updatedAt: string;
+  oblasts: NeptunAlert[];
+  raions: NeptunAlert[];
+}
 
 interface NeptunAlert {
   key: string;
@@ -49,16 +56,20 @@ const toLevel = (level: string): UkraineAlertLevel =>
   level === "yellow" ? "yellow" : "red";
 
 export async function getUkraineAlerts(): Promise<UkraineAlerts> {
-  const data = await fetchQuery<{
-    updatedAt: string;
-    oblasts: NeptunAlert[];
-    raions: NeptunAlert[];
-  }>(NEPTUN_ALERTS_URL, {
-    headers: { "User-Agent": "defensownik.solvro.pl" },
-    next: { revalidate: 30 },
-  });
+  const live = neptunStream().liveAlerts();
+  if (live !== null) {
+    return toUkraineAlerts(live);
+  }
+  return toUkraineAlerts(
+    await fetchQuery<NeptunAlertsPayload>(NEPTUN_ALERTS_URL, {
+      headers: { "User-Agent": "defensownik.solvro.pl" },
+      next: { revalidate: 30 },
+    }),
+  );
+}
 
-  const oblasts = data.oblasts.flatMap((alert) => {
+export function toUkraineAlerts(data: NeptunAlertsPayload): UkraineAlerts {
+  const oblasts = (data.oblasts ?? []).flatMap((alert) => {
     const oblastId = oblastIdByKey.get(normalizeOblast(alert.key));
     return oblastId === undefined
       ? []
@@ -72,7 +83,7 @@ export async function getUkraineAlerts(): Promise<UkraineAlerts> {
         ];
   });
 
-  const raionAlerts = data.raions.flatMap((alert) => {
+  const raionAlerts = (data.raions ?? []).flatMap((alert) => {
     const key = RAION_ALIASES[alert.key] ?? alert.key;
     const raion = raionByKey.get(`${normalizeOblast(alert.oblast)}|${key}`);
     return raion === undefined

@@ -2,7 +2,7 @@ import { demoThreats } from "@wartownik/shared/demo";
 import type { PoolClient } from "pg";
 
 import { getDb } from "../db";
-import { fetchThreats, toDronePoints } from "../services/drones";
+import { currentThreats, toDronePoints } from "../services/drones";
 import { dispatchRegionAlerts } from "../services/notifications";
 import {
   pruneThreatPositions,
@@ -55,7 +55,7 @@ async function tick() {
     if (!(await holdLeadership())) {
       return;
     }
-    const threats = await fetchThreats({ cache: "no-store" });
+    const threats = await currentThreats({ cache: "no-store" });
     await recordThreatPositions(threats);
     const now = Date.now();
     const points = toDronePoints(threats, now);

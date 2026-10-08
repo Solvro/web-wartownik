@@ -5,7 +5,13 @@ export interface Context {
   resHeaders?: Headers;
 }
 
-const t = initTRPC.context<Context>().create({ transformer: superjson });
+const t = initTRPC.context<Context>().create({
+  transformer: superjson,
+  sse: {
+    ping: { enabled: true, intervalMs: 15_000 },
+    client: { reconnectAfterInactivityMs: 40_000 },
+  },
+});
 
 export const router = t.router;
 export const publicProcedure = t.procedure;

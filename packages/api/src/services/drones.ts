@@ -11,6 +11,7 @@ import type {
 import type { Coordinates } from "@wartownik/shared/types/map";
 
 import { fetchQuery } from "../helpers/fetch-query";
+import { neptunStream } from "./neptun-stream";
 
 export const NEPTUN_API_URL = "https://neptun.in.ua/api/v1/threats";
 
@@ -53,6 +54,10 @@ export async function fetchThreats(init?: RequestInit): Promise<Threat[]> {
     headers: { "User-Agent": "defensownik.solvro.pl" },
   });
   return threats;
+}
+
+export async function currentThreats(init?: RequestInit): Promise<Threat[]> {
+  return neptunStream().liveThreats() ?? fetchThreats(init);
 }
 
 function predictPosition(threat: Threat, now: number): Coordinates {
@@ -136,12 +141,14 @@ export function toDronePoints(
     });
 }
 
-export const getDrones: LayerFetchFunction<Layer.Drones> = async () => {
-  const threats = await fetchThreats({ next: { revalidate: 10 } });
+export function toDroneLayer(threats: Threat[]) {
   const now = Date.now();
   const points = toDronePoints(threats, now);
   if (process.env.DEMO_SCENARIO === "lubelskie") {
     points.push(...demoThreats(now));
   }
   return { points, clusters: [] };
-};
+}
+
+export const getDrones: LayerFetchFunction<Layer.Drones> = async () =>
+  toDroneLayer(await currentThreats({ next: { revalidate: 10 } }));
