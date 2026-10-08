@@ -1,6 +1,6 @@
-import { keepPreviousData, useQueries } from "@tanstack/react-query";
+import { keepPreviousData, useQueries, useQuery } from "@tanstack/react-query";
 import { LAYER_CONFIG } from "@wartownik/shared/config/layers";
-import { computeRegionStates } from "@wartownik/shared/regions";
+import { applyRcbAlerts, computeRegionStates } from "@wartownik/shared/regions";
 import type { RegionState } from "@wartownik/shared/regions";
 import { LAYERS, Layer } from "@wartownik/shared/types/layers";
 import type {
@@ -9,6 +9,7 @@ import type {
   LayerLocation,
   LayerPoint,
 } from "@wartownik/shared/types/layers";
+import type { RcbAlert } from "@wartownik/shared/types/rcb-alerts";
 import { useMemo } from "react";
 
 import { useOfflinePack } from "@/lib/offline-pack";
@@ -69,6 +70,7 @@ export interface LiveData {
   clusters: LayerClusterWithLayer[];
   threats: LayerLocation<Layer.Drones>[];
   regionStates: RegionState[];
+  rcbAlerts: RcbAlert[];
   isFetching: boolean;
   failedLayers: Layer[];
   updatedAt: number | undefined;
@@ -145,10 +147,18 @@ export function useLiveData(
     },
   });
 
+  const { data: rcb } = useQuery({
+    ...trpc.alerts.rcb.queryOptions(),
+    refetchInterval: 30_000,
+    staleTime: 20_000,
+  });
+  const rcbAlerts = useMemo(() => rcb?.alerts ?? [], [rcb]);
+
   const regionStates = useMemo(
-    () => computeRegionStates(REGIONS, result.threats),
-    [result.threats],
+    () =>
+      applyRcbAlerts(computeRegionStates(REGIONS, result.threats), rcbAlerts),
+    [result.threats, rcbAlerts],
   );
 
-  return { ...result, regionStates };
+  return { ...result, regionStates, rcbAlerts };
 }

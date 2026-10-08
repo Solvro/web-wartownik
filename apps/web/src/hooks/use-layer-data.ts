@@ -57,6 +57,7 @@ const isAlwaysFetched = (layer: Layer) => layer === Layer.Drones;
 export function useLayerData(
   enabledLayers: EnabledLayers,
   viewport: Viewport | null,
+  live = false,
 ): LayerDataResult {
   const [debouncedViewport, setDebouncedViewport] = useState(viewport);
   useDebounce(() => setDebouncedViewport(viewport), VIEWPORT_DEBOUNCE_MS, [
@@ -80,7 +81,8 @@ export function useLayerData(
           (enabledLayers[layer] || isAlwaysFetched(layer)) &&
           (config.scope === "global" || viewportParams !== null),
         staleTime: config.staleTime,
-        refetchInterval: config.refetchInterval,
+        refetchInterval:
+          live && layer === Layer.Drones ? false : config.refetchInterval,
         placeholderData: keepPreviousData,
       };
     }),

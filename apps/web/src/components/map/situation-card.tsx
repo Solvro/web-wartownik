@@ -2,44 +2,22 @@
 
 import { conjugateNumeric } from "@wartownik/shared/geo/numerals";
 import {
-  REGION_STATUS_RANK,
   REGION_STATUS_VISUALS,
-  regionGenitive,
+  regionAlertText,
+  sortedAlerts,
 } from "@wartownik/shared/regions";
 import type { RegionState } from "@wartownik/shared/regions";
 import { ChevronRight, ShieldCheck, TriangleAlert } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
+export { regionAlertText, sortedAlerts };
+
 const timeFormat = new Intl.DateTimeFormat("pl-PL", {
   hour: "2-digit",
   minute: "2-digit",
   second: "2-digit",
 });
-
-export function regionAlertText(region: RegionState): string {
-  const name = `woj. ${regionGenitive(region.name)}`;
-  switch (region.status) {
-    case "threat":
-      return `Zagrożenie powietrzne nad obszarem ${name}`;
-    case "approaching":
-      return `Zagrożenie zbliża się do ${name}${region.etaMinutes === null ? "" : ` – ok. ${region.etaMinutes} min`}`;
-    case "watch":
-      return `Zagrożenie w pobliżu ${name}`;
-    case "none":
-      return "";
-  }
-}
-
-export function sortedAlerts(regions: RegionState[]): RegionState[] {
-  return regions
-    .filter((region) => region.country === "PL" && region.status !== "none")
-    .sort(
-      (a, b) =>
-        REGION_STATUS_RANK[b.status] - REGION_STATUS_RANK[a.status] ||
-        (a.etaMinutes ?? Infinity) - (b.etaMinutes ?? Infinity),
-    );
-}
 
 interface SituationCardProps {
   regions: RegionState[];
@@ -87,7 +65,9 @@ export function SituationCard({
             {top === undefined
               ? "Brak zagrożeń powietrznych nad Polską"
               : alerts.length === 1
-                ? REGION_STATUS_VISUALS[top.status].label
+                ? top.rcb !== undefined && top.threats.length === 0
+                  ? "Alert RCB"
+                  : REGION_STATUS_VISUALS[top.status].label
                 : `Alerty w ${alerts.length} województwach`}
           </p>
           <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">

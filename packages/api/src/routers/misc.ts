@@ -5,8 +5,10 @@ import { z } from "zod";
 
 import { getDb } from "../db";
 import { getAircraftDetails } from "../services/aircraft-details";
+import { getAirspaceZones } from "../services/airspace";
 import { searchPlaces } from "../services/geocode";
 import { getOfflinePack } from "../services/offline";
+import { getRcbAlerts } from "../services/rcb-alerts";
 import { getThreatHistory } from "../services/threat-history";
 import { getThreatTrack } from "../services/threat-track";
 import { getUkraineAlerts } from "../services/ukraine-alerts";
@@ -109,6 +111,27 @@ export const alertsRouter = router({
       return alerts;
     } catch (error) {
       throw gateway("Failed to fetch Ukraine alerts", error);
+    }
+  }),
+  rcb: publicProcedure.query(async ({ ctx }) => {
+    try {
+      const alerts = await getRcbAlerts();
+      setCacheControl(ctx, "public, max-age=30, stale-while-revalidate=60");
+      return alerts;
+    } catch (error) {
+      throw gateway("Failed to fetch RCB alerts", error);
+    }
+  }),
+});
+
+export const airspaceRouter = router({
+  zones: publicProcedure.query(async ({ ctx }) => {
+    try {
+      const zones = await getAirspaceZones();
+      setCacheControl(ctx, "public, max-age=300, stale-while-revalidate=600");
+      return zones;
+    } catch (error) {
+      throw gateway("Failed to fetch airspace zones", error);
     }
   }),
 });

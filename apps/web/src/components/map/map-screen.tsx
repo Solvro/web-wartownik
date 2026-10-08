@@ -5,6 +5,7 @@ import { demoThreats } from "@wartownik/shared/demo";
 import { presentPoint } from "@wartownik/shared/presentation/index";
 import {
   REGION_STATUS_VISUALS,
+  applyRcbAlerts,
   computeRegionStates,
   regionBounds,
 } from "@wartownik/shared/regions";
@@ -31,6 +32,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { GEO_URLS } from "@/config/geo";
 import { useAircraftDetails } from "@/hooks/use-aircraft-details";
 import { useLayerData } from "@/hooks/use-layer-data";
+import { useLiveFeed } from "@/hooks/use-live-feed";
 import { useMap } from "@/hooks/use-map";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useStoredFlag } from "@/hooks/use-stored-flag";
@@ -39,12 +41,14 @@ import { useThreatTrack } from "@/hooks/use-threat-track";
 import { pointKeys } from "@/lib/map/features";
 import { useTRPC } from "@/lib/trpc";
 
+import { AirspaceToggle, AirspaceZoneContent } from "./airspace-zones";
 import { AlertBar } from "./alert-bar";
 import { BorderLegend } from "./border-legend";
 import { DetailsContent } from "./details-panel";
 import { LayerList } from "./layer-list";
 import type { MapTrail } from "./map-canvas";
 import { MapControls } from "./map-controls";
+import { RcbAlertContent, RcbAlertsCard } from "./rcb-alerts";
 import { RegionContent } from "./region-panel";
 import { SearchBox } from "./search-box";
 import { SituationCard, sortedAlerts } from "./situation-card";
@@ -77,6 +81,8 @@ type Selection =
   | { kind: "point"; key: string; point: LayerPoint }
   | { kind: "region"; id: string }
   | { kind: "ua-raion"; id: string }
+  | { kind: "rcb"; id: string }
+  | { kind: "airspace"; id: string }
   | null;
 
 interface RaionInfo {
@@ -115,9 +121,14 @@ export function MapScreen() {
     "wartownik-ua-alerts",
     true,
   );
+  const [airspaceEnabled, setAirspaceEnabled] = useStoredFlag(
+    "wartownik-airspace",
+    false,
+  );
   const trpc = useTRPC();
 
-  const data = useLayerData(enabledLayers, viewport);
+  const live = useLiveFeed(true);
+  const data = useLayerData(enabledLayers, viewport, live.drones);
 
   const [timelineOpen, setTimelineOpen] = useState(false);
   const [timelineHours, setTimelineHours] = useState<number>(24);
@@ -206,9 +217,24 @@ export function MapScreen() {
   const { data: ukraineAlerts } = useQuery({
     ...trpc.alerts.ukraine.queryOptions(),
     enabled: ukraineAlertsEnabled,
+    refetchInterval: live.ukraine ? false : 30_000,
+    staleTime: 20_000,
+  });
+
+  const { data: rcbAlerts } = useQuery({
+    ...trpc.alerts.rcb.queryOptions(),
     refetchInterval: 30_000,
     staleTime: 20_000,
   });
+  const rcbAlertList = useMemo(() => rcbAlerts?.alerts ?? [], [rcbAlerts]);
+
+  const { data: airspaceZones } = useQuery({
+    ...trpc.airspace.zones.queryOptions(),
+    enabled: airspaceEnabled,
+    refetchInterval: 5 * 60_000,
+    staleTime: 4 * 60_000,
+  });
+  const visibleAirspaceZones = airspaceEnabled ? (airspaceZones ?? null) : null;
   const visibleUkraineAlerts = ukraineAlertsEnabled
     ? (ukraineAlerts ?? null)
     : null;
@@ -277,8 +303,11 @@ export function MapScreen() {
     () =>
       regionCollection === null
         ? []
-        : computeRegionStates(regionCollection, threats),
-    [regionCollection, threats],
+        : applyRcbAlerts(
+            computeRegionStates(regionCollection, threats),
+            historicalThreats === null ? rcbAlertList : [],
+          ),
+    [regionCollection, threats, historicalThreats, rcbAlertList],
   );
 
   const regionStatusKey = regionStates
@@ -452,6 +481,11 @@ export function MapScreen() {
         }
         onChange={setUkraineAlertsEnabled}
       />
+      <AirspaceToggle
+        enabled={airspaceEnabled}
+        count={airspaceZones?.features.length}
+        onChange={setAirspaceEnabled}
+      />
     </div>
   );
 
@@ -472,9 +506,45 @@ export function MapScreen() {
         )
       : undefined;
 
+  const selectedAirspaceZone =
+    selection?.kind === "airspace"
+      ? visibleAirspaceZones?.features.find(
+          (feature) => feature.properties.id === selection.id,
+        )?.properties
+      : undefined;
+
+  const selectedRcbAlert =
+    selection?.kind === "rcb"
+      ? rcbAlertList.find((alert) => alert.id === selection.id)
+      : undefined;
+
+  const rcbCard = (
+    <RcbAlertsCard
+      alerts={rcbAlertList}
+      regionLabel={regionLabel}
+      onSelect={(id) => {
+        setSelection({ kind: "rcb", id });
+        setLayersOpen(false);
+      }}
+    />
+  );
+
   const closeSelection = () => setSelection(null);
   const selectionContent =
-    selectedRaionAlert !== undefined ? (
+    selectedAirspaceZone !== undefined ? (
+      <AirspaceZoneContent
+        zone={selectedAirspaceZone}
+        regionLabel={regionLabel}
+        onSelectRegion={openRegionAndZoom}
+        onClose={closeSelection}
+      />
+    ) : selectedRcbAlert !== undefined ? (
+      <RcbAlertContent
+        alert={selectedRcbAlert}
+        regionLabel={regionLabel}
+        onClose={closeSelection}
+      />
+    ) : selectedRaionAlert !== undefined ? (
       <UkraineAlertContent
         title={`rejon ${raionInfo?.get(selectedRaionAlert.raionId)?.name ?? ""} · ${regionLabel(selectedRaionAlert.oblastId)}`}
         alert={selectedRaionAlert}
@@ -514,6 +584,11 @@ export function MapScreen() {
         regionStatuses={regionStatuses}
         ukraineAlerts={timelineOpen ? null : visibleUkraineAlerts}
         onSelectUkraineAlert={(id) => setSelection({ kind: "ua-raion", id })}
+        airspaceZones={timelineOpen ? null : visibleAirspaceZones}
+        selectedAirspaceZone={
+          selectedAirspaceZone === undefined ? null : selectedAirspaceZone.id
+        }
+        onSelectAirspaceZone={(id) => setSelection({ kind: "airspace", id })}
         selectedKey={
           selectedPoint === null
             ? null
@@ -573,6 +648,7 @@ export function MapScreen() {
               <DrawerTitle className="sr-only">Warstwy</DrawerTitle>
               <div className="flex flex-col gap-3 overflow-y-auto p-4 *:shrink-0">
                 {situation}
+                {rcbCard}
                 {timelineButton}
                 {borderLegend}
                 {layerList}
@@ -642,6 +718,7 @@ export function MapScreen() {
               <div className="flex flex-col gap-4 px-4 pb-4">
                 <div className="flex flex-col gap-2">
                   {situation}
+                  {rcbCard}
                   {timelineButton}
                   {borderLegend}
                 </div>

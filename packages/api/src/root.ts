@@ -1,6 +1,8 @@
 import { layersRouter } from "./routers/layers";
+import { liveRouter } from "./routers/live";
 import {
   aircraftRouter,
+  airspaceRouter,
   alertsRouter,
   geocodeRouter,
   offlineRouter,
@@ -21,6 +23,8 @@ export const appRouter = router({
   notifications: notificationsRouter,
   system: systemRouter,
   alerts: alertsRouter,
+  live: liveRouter,
+  airspace: airspaceRouter,
 });
 
 export type AppRouter = typeof appRouter;

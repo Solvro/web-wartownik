@@ -10,9 +10,11 @@ import type {
 } from "geojson";
 
 import { REGION_WATCH_DISTANCE_KM } from "./config/constants";
-import { haversineDistance } from "./geo/geo";
+import { COURSE_LIMITS } from "./config/threats";
+import { destinationPoint, haversineDistance } from "./geo/geo";
 import type { Layer, LayerLocation } from "./types/layers";
 import type { Bounds, Coordinates } from "./types/map";
+import type { RcbAlert } from "./types/rcb-alerts";
 
 export type RegionStatus = "threat" | "approaching" | "watch" | "none";
 
@@ -65,6 +67,7 @@ export interface RegionState {
   status: RegionStatus;
   threats: RegionThreat[];
   etaMinutes: number | null;
+  rcb?: RcbAlert;
 }
 
 export const REGION_STATUS_RANK: Record<RegionStatus, number> = {
@@ -79,7 +82,7 @@ export const REGION_STATUS_VISUALS: Record<
   { color: string; label: string }
 > = {
   threat: { color: "#dc2626", label: "Zagrożenie w regionie" },
-  approaching: { color: "#ea580c", label: "Zagrożenie się zbliża" },
+  approaching: { color: "#dc2626", label: "Zagrożenie kursem na region" },
   watch: { color: "#ca8a04", label: "Zagrożenie w pobliżu" },
   none: { color: "#3b82f6", label: "Brak zagrożeń" },
 };
@@ -97,18 +100,39 @@ function bboxDistanceKm(bounds: Bounds, { lat, lng }: Coordinates): number {
   );
 }
 
+const etaMinutes = (distanceKm: number, speedKmh: number | null) =>
+  speedKmh !== null && speedKmh > 0
+    ? Math.max(1, Math.round((distanceKm / speedKmh) * 60))
+    : null;
+
+function crossesRegion(
+  from: Coordinates,
+  to: Coordinates,
+  region: RegionFeature,
+): boolean {
+  return booleanIntersects(
+    lineString([
+      [from.lng, from.lat],
+      [to.lng, to.lat],
+    ]),
+    region,
+  );
+}
+
 function classify(
   region: RegionFeature,
   bounds: Bounds,
   threat: LayerLocation<Layer.Drones>,
   includeWatch: boolean,
 ): RegionThreat | null {
+  const course = COURSE_LIMITS[threat.meta.type] ?? COURSE_LIMITS.unknown;
   const reach = Math.max(
     REGION_WATCH_DISTANCE_KM,
     threat.meta.uncertaintyKm ?? 0,
     threat.meta.predictedPath === null
       ? 0
       : haversineDistance(threat, threat.meta.predictedPath),
+    includeWatch && threat.meta.heading !== null ? course.watchKm : 0,
   );
   if (bboxDistanceKm(bounds, threat) > reach) {
     return null;
@@ -130,26 +154,35 @@ function classify(
     units: "kilometers",
   });
   const path = threat.meta.predictedPath;
-  if (
-    active &&
-    path !== null &&
-    booleanIntersects(
-      lineString([
-        [threat.lng, threat.lat],
-        [path.lng, path.lat],
-      ]),
-      region,
-    )
-  ) {
-    const speed = threat.meta.speedKmh;
+  if (active && path !== null && crossesRegion(threat, path, region)) {
     return {
       threatId: threat.meta.id,
       status: "approaching",
       distanceKm,
-      etaMinutes:
-        speed !== null && speed > 0
-          ? Math.max(1, Math.round((distanceKm / speed) * 60))
-          : null,
+      etaMinutes: etaMinutes(distanceKm, threat.meta.speedKmh),
+    };
+  }
+
+  const heading = threat.meta.heading;
+  if (
+    active &&
+    includeWatch &&
+    heading !== null &&
+    distanceKm <= course.watchKm &&
+    crossesRegion(
+      threat,
+      destinationPoint(threat, heading, course.watchKm),
+      region,
+    )
+  ) {
+    return {
+      threatId: threat.meta.id,
+      status: distanceKm <= course.alertKm ? "approaching" : "watch",
+      distanceKm,
+      etaMinutes: etaMinutes(
+        distanceKm,
+        threat.meta.speedKmh ?? course.cruiseKmh,
+      ),
     };
   }
 
@@ -196,6 +229,44 @@ export function computeRegionStates(
   });
 }
 
+export const isActiveRcbAirAlert = (alert: RcbAlert) =>
+  alert.air && !alert.cancelled;
+
+export function applyRcbAlerts(
+  states: RegionState[],
+  alerts: RcbAlert[],
+): RegionState[] {
+  const active = alerts.filter(isActiveRcbAirAlert);
+  if (active.length === 0) {
+    return states;
+  }
+  return states.map((state) => {
+    const rcb = active.find((alert) => alert.regionIds.includes(state.id));
+    if (rcb === undefined) {
+      return state;
+    }
+    return {
+      ...state,
+      rcb,
+      status:
+        REGION_STATUS_RANK[state.status] < REGION_STATUS_RANK.watch
+          ? "watch"
+          : state.status,
+    };
+  });
+}
+
+export function regionAt(
+  regions: RegionCollection,
+  { lat, lng }: Coordinates,
+): RegionProperties | null {
+  const position = point([lng, lat]);
+  return (
+    regions.features.find((region) => booleanPointInPolygon(position, region))
+      ?.properties ?? null
+  );
+}
+
 export function regionBounds(region: RegionFeature): Bounds {
   let west = Infinity;
   let east = -Infinity;
@@ -218,6 +289,9 @@ export function regionBounds(region: RegionFeature): Bounds {
 
 export function regionAlertText(region: RegionState): string {
   const name = `woj. ${regionGenitive(region.name)}`;
+  if (region.rcb !== undefined && region.threats.length === 0) {
+    return `Alert RCB dla ${name}`;
+  }
   switch (region.status) {
     case "threat":
       return `Zagrożenie powietrzne nad obszarem ${name}`;

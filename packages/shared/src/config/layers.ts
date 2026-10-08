@@ -24,9 +24,9 @@ export const LAYER_CONFIG: Record<Layer, LayerConfig> = {
   [Layer.Drones]: {
     slug: "drones",
     scope: "global",
-    staleTime: 10 * SECOND,
-    refetchInterval: 15 * SECOND,
-    cacheControl: "public, max-age=10, stale-while-revalidate=20",
+    staleTime: 4 * SECOND,
+    refetchInterval: 5 * SECOND,
+    cacheControl: "public, max-age=3, stale-while-revalidate=10",
   },
   [Layer.Aircraft]: {
     slug: "aircraft",

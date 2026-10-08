@@ -28,8 +28,14 @@ export function RegionDetails({
       <Text style={styles.title}>{region.name}</Text>
       <StatusPill
         color={visual.color}
-        label={`${visual.label}${region.etaMinutes === null ? "" : ` · ok. ${region.etaMinutes} min`}`}
+        label={`${region.rcb !== undefined && region.threats.length === 0 ? "Alert RCB" : visual.label}${region.etaMinutes === null ? "" : ` · ok. ${region.etaMinutes} min`}`}
       />
+      {region.rcb === undefined ? null : (
+        <View style={styles.rcb}>
+          <Text style={styles.rcbTitle}>Alert RCB</Text>
+          <Text style={styles.rcbText}>{region.rcb.message}</Text>
+        </View>
+      )}
       {region.threats.length === 0 ? (
         <Text style={styles.empty}>
           {region.country === "PL"
@@ -105,4 +111,14 @@ const styles = StyleSheet.create({
   itemTitle: { color: colors.text, fontWeight: "600" },
   itemMeta: { color: colors.textMuted, fontSize: 12 },
   note: { color: colors.textMuted, fontSize: 12, lineHeight: 18 },
+  rcb: {
+    gap: 4,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: "rgba(234,179,8,0.45)",
+    backgroundColor: "rgba(234,179,8,0.12)",
+    padding: 12,
+  },
+  rcbTitle: { color: "#EAB308", fontWeight: "700" },
+  rcbText: { color: colors.text, lineHeight: 20 },
 });
