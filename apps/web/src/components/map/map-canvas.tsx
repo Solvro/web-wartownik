@@ -2,6 +2,7 @@
 
 import { POLAND_BOUNDS } from "@wartownik/shared/config/constants";
 import type { RegionCollection, RegionStatus } from "@wartownik/shared/regions";
+import type { AirspaceZones } from "@wartownik/shared/types/airspace";
 import type {
   LayerClusterWithLayer,
   LayerPoint,
@@ -33,6 +34,8 @@ import { buildMapFeatures } from "@/lib/map/features";
 import { addMissingImage } from "@/lib/map/images";
 import {
   CLUSTER_PROPERTIES,
+  airspaceFill,
+  airspaceLine,
   arrowSymbol,
   clusterCircle,
   clusterCount,
@@ -73,8 +76,17 @@ const INTERACTIVE_LAYERS = [
   "clustered-markers",
   "clusters",
   "ukraine-raions-fill",
+  "airspace-fill",
   "regions-fill",
 ];
+
+const AREA_LAYERS = new Set([
+  "regions-fill",
+  "ukraine-raions-fill",
+  "airspace-fill",
+]);
+
+const EMPTY_ZONES: AirspaceZones = { type: "FeatureCollection", features: [] };
 
 const PULSE_PERIOD_MS = 1600;
 
@@ -99,6 +111,9 @@ interface MapCanvasProps {
   regionStatuses: Record<string, RegionStatus>;
   ukraineAlerts: UkraineAlerts | null;
   onSelectUkraineAlert(raionId: string): void;
+  airspaceZones: AirspaceZones | null;
+  selectedAirspaceZone: string | null;
+  onSelectAirspaceZone(zoneId: string): void;
   onSelectPoint(index: number): void;
   onSelectRegion(regionId: string): void;
 }
@@ -126,6 +141,9 @@ export function MapCanvas({
   regionStatuses,
   ukraineAlerts,
   onSelectUkraineAlert,
+  airspaceZones,
+  selectedAirspaceZone,
+  onSelectAirspaceZone,
   onSelectPoint,
   onSelectRegion,
 }: MapCanvasProps) {
@@ -338,16 +356,13 @@ export function MapCanvas({
         (ukraineAlertsRef.current?.raions ?? []).map((alert) => alert.raionId),
       );
       const feature =
-        features.find(
-          (item) =>
-            item.layer.id !== "regions-fill" &&
-            item.layer.id !== "ukraine-raions-fill",
-        ) ??
+        features.find((item) => !AREA_LAYERS.has(item.layer.id)) ??
         features.find(
           (item) =>
             item.layer.id === "ukraine-raions-fill" &&
             alertedRaions.has(String((item.properties as { id: string }).id)),
         ) ??
+        features.find((item) => item.layer.id === "airspace-fill") ??
         features.find((item) => item.layer.id === "regions-fill");
       const map = mapRef.current?.getMap();
       if (feature === undefined || map === undefined) {
@@ -356,6 +371,10 @@ export function MapCanvas({
       const properties = feature.properties as Record<string, unknown>;
       if (feature.layer.id === "ukraine-raions-fill") {
         onSelectUkraineAlert(String(properties.id));
+        return;
+      }
+      if (feature.layer.id === "airspace-fill") {
+        onSelectAirspaceZone(String(properties.id));
         return;
       }
       const [lng, lat] = (feature.geometry as Point).coordinates;
@@ -380,7 +399,7 @@ export function MapCanvas({
         onSelectPoint(properties.i);
       }
     },
-    [onSelectPoint, onSelectRegion, onSelectUkraineAlert],
+    [onSelectPoint, onSelectRegion, onSelectUkraineAlert, onSelectAirspaceZone],
   );
 
   const setHoveredRegion = useCallback((regionId: string | null) => {
@@ -452,6 +471,24 @@ export function MapCanvas({
       applyRegionStatuses(map);
     }
   }, [regionStatuses, ukraineAlerts, applyRegionStatuses, mapReady]);
+
+  useEffect(() => {
+    const map = mapRef.current?.getMap();
+    if (
+      map === undefined ||
+      selectedAirspaceZone === null ||
+      map.getSource("airspace") === undefined
+    ) {
+      return;
+    }
+    const target = { source: "airspace", id: selectedAirspaceZone };
+    map.setFeatureState(target, { selected: true });
+    return () => {
+      if (map.getSource("airspace") !== undefined) {
+        map.setFeatureState(target, { selected: false });
+      }
+    };
+  }, [selectedAirspaceZone, airspaceZones, mapReady]);
 
   useEffect(() => {
     const map = mapRef.current?.getMap();
@@ -543,6 +580,15 @@ export function MapCanvas({
           beforeId={labelLayerId}
           {...ukraineAlertLine}
         />
+      </Source>
+      <Source
+        id="airspace"
+        type="geojson"
+        data={airspaceZones ?? EMPTY_ZONES}
+        promoteId="id"
+      >
+        <Layer id="airspace-fill" beforeId={labelLayerId} {...airspaceFill} />
+        <Layer id="airspace-line" beforeId={labelLayerId} {...airspaceLine} />
       </Source>
       <Source id="region-labels" type="geojson" data={GEO_URLS.regionLabels}>
         <Layer id="regions-label" {...regionLabel(dark)} />

@@ -12,6 +12,7 @@ import { MapCanvas } from "@/components/map-canvas";
 import type { MapCanvasHandle } from "@/components/map-canvas";
 import { MapCompass } from "@/components/map-compass";
 import { PointDetails } from "@/components/point-details";
+import { RcbAlerts } from "@/components/rcb-alerts";
 import { RegionDetails } from "@/components/region-details";
 import { useConnectivity } from "@/hooks/use-connectivity";
 import { useLiveData } from "@/hooks/use-live-data";
@@ -193,6 +194,7 @@ export function NativeMapScreen() {
         handleIndicatorStyle={styles.handle}
       >
         <BottomSheetScrollView contentContainerStyle={styles.sheetContent}>
+          <RcbAlerts alerts={data.rcbAlerts} />
           <Text style={styles.sheetTitle}>Warstwy</Text>
           <LayerToggles failedLayers={data.failedLayers} />
         </BottomSheetScrollView>

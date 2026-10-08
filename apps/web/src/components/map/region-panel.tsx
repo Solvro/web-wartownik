@@ -8,7 +8,7 @@ import {
 } from "@wartownik/shared/regions";
 import type { RegionState } from "@wartownik/shared/regions";
 import type { Layer, LayerLocation } from "@wartownik/shared/types/layers";
-import { Maximize2, X } from "lucide-react";
+import { Maximize2, Megaphone, X } from "lucide-react";
 
 import { Icon } from "@/components/icon";
 import { Button } from "@/components/ui/button";
@@ -52,7 +52,9 @@ export function RegionContent({
               className="size-1.5 rounded-full"
               style={{ backgroundColor: visual.color }}
             />
-            {visual.label}
+            {region.rcb !== undefined && region.threats.length === 0
+              ? "Alert RCB"
+              : visual.label}
             {region.etaMinutes === null
               ? ""
               : ` · ok. ${region.etaMinutes} min`}
@@ -69,6 +71,16 @@ export function RegionContent({
           </Button>
         )}
       </div>
+
+      {region.rcb === undefined ? null : (
+        <div className="flex gap-3 rounded-xl border border-yellow-500/40 bg-yellow-500/10 px-3.5 py-3 text-sm">
+          <Megaphone className="mt-0.5 size-4 shrink-0 text-yellow-500" />
+          <div>
+            <p className="font-medium">Alert RCB</p>
+            <p className="mt-0.5 text-muted-foreground">{region.rcb.message}</p>
+          </div>
+        </div>
+      )}
 
       {region.threats.length === 0 ? (
         <p className="rounded-xl border bg-muted/40 px-3.5 py-3 text-sm text-muted-foreground">

@@ -1,3 +1,4 @@
+import { AIRSPACE_COLORS } from "@wartownik/shared/airspace";
 import { LAYER_VISUALS } from "@wartownik/shared/config/layer-visuals";
 import { LAYER_CONFIG } from "@wartownik/shared/config/layers";
 import { REGION_STATUS_VISUALS } from "@wartownik/shared/regions";
@@ -273,9 +274,9 @@ function regionOpacity(dark: boolean, scale: number): ExpressionSpecification {
     "threat",
     0.32 * scale,
     "approaching",
-    0.24 * scale,
+    0.3 * scale,
     "watch",
-    0.15 * scale,
+    0.2 * scale,
     (dark ? 0.06 : 0.05) * scale,
   ];
 }
@@ -531,6 +532,43 @@ export const ukraineAlertLine: Omit<LineLayerSpecification, "id" | "source"> = {
       0,
       0.85,
     ],
+  },
+};
+
+const airspaceColor: ExpressionSpecification = [
+  "case",
+  ["get", "notable"],
+  AIRSPACE_COLORS.notable,
+  AIRSPACE_COLORS.routine,
+];
+
+export const airspaceFill: Omit<FillLayerSpecification, "id" | "source"> = {
+  type: "fill",
+  paint: {
+    "fill-color": airspaceColor,
+    "fill-opacity": [
+      "case",
+      ["boolean", ["feature-state", "selected"], false],
+      0.35,
+      ["get", "notable"],
+      0.16,
+      0.08,
+    ],
+  },
+};
+
+export const airspaceLine: Omit<LineLayerSpecification, "id" | "source"> = {
+  type: "line",
+  paint: {
+    "line-color": airspaceColor,
+    "line-width": [
+      "case",
+      ["boolean", ["feature-state", "selected"], false],
+      2.5,
+      1,
+    ],
+    "line-opacity": 0.8,
+    "line-dasharray": [3, 2],
   },
 };
 
